@@ -49,7 +49,7 @@ static Point_s getNextHipoteticRobotPosition(void)
 //Funcione que devuelve un 0 si no choco con nada, o el indici de la pared con la que colisiona.
 static uint16_t hasCrashedWithWall(Point_s previousPoint, Point_s nextPoint)
 {
-	static uint16_t i;
+	uint16_t i;
 	bool exit = false;
 	Wall_s wall2Check;
 	for (i = 0;(i < myMap.nWalls) && (exit == false); i++)
