@@ -1,15 +1,22 @@
 #include "World.h"
 #include <math.h>
 #define W_PI       3.14159265358979323846
-
-static Point_s getNextHipoteticRobotPosition(void);
+#define MAX_HIPO	100
 
 static Map_s myMap;
 static Robot_s myRobot;
 
+static Point_s getNextHipoteticRobotPosition(void);
+static uint16_t hasCrashedWithWall(Point_s previousPoint, Point_s nextPoint);
+static bool onSegment(Point_s p, Point_s q, Point_s r);
+static int orientation(Point_s p, Point_s q, Point_s r);
+static bool doIntersect(Point_s p1, Point_s q1, Point_s p2, Point_s q2);
+static double max(double x, double y);
+static double min(double x, double y);
+static double calculatePendient(Point_s firstPoint, Point_s secondPoint);
+static Point_s getIntersectionPoint(Point_s start, Point_s end, Wall_s wall);
 
-
-int16_t W_init(Map_s * mapInfo)
+int16_t W_Init(Map_s * mapInfo)
 {
 	myMap = *mapInfo;
 	return false;
@@ -35,6 +42,14 @@ int16_t W_Update(void)
 		myRobot.position = getIntersectionPoint(myRobot.position, nextPosition, wallTouched);
 		return false;
 	}
+}
+
+sensData_t W_getSensorData(uint16_t sensorID)
+{
+	sensData_t answer;
+	answer.angle =  myRobot.direction + getAngle(sensorID);
+	answer.distance = getMinDistance(answer.angle, sensorID);
+	return answer;
 }
 
 static Point_s getNextHipoteticRobotPosition(void)
@@ -148,6 +163,8 @@ static double calculatePendient(Point_s firstPoint, Point_s secondPoint)
 devuelve el punto de interseccion con la Wall
 IMPORTANTE: esta funcion no chequea si hubo interseccion o no, asume que la hubo, en caso de que no halla interseccion y 
 esta funcion sea llamada, devuelve basura.
+Recibe: 2 puntos los cuales generan un segmento, y una pared
+Devuelve: el punto de interseccion.
 */
 static Point_s getIntersectionPoint(Point_s start, Point_s end, Wall_s wall)
 {
@@ -157,4 +174,44 @@ static Point_s getIntersectionPoint(Point_s start, Point_s end, Wall_s wall)
 		- calculatePendient(wall.start, wall.end));
 	answer.y = (calculatePendient(start, end) * answer.x);
 	return answer;
+}
+
+static double getMinDistance(double _angle, uint16_t sensorID)
+{
+	uint16_t i;
+	Point_s firstPoint;
+	firstPoint.x = myRobot.position.x + myRobot.sensorArray[sensorID].positionOnRobot.x;
+	firstPoint.y = myRobot.position.y + myRobot.sensorArray[sensorID].positionOnRobot.y;
+	Point_s secondPoint = getPoint(firstPoint, _angle, MAX_HIPO);
+	Wall_s wall2Check;
+	Wall_s nearestWall = myMap.walls[0];//inicializacion de nearestWall para que funcione el for
+	for (i = 0; i < myMap.nWalls; i++)
+	{
+		wall2Check = myMap.walls[i];
+		if (doIntersect(firstPoint, secondPoint, wall2Check.start, wall2Check.end))
+		{
+			if(getDistance(firstPoint,getIntersectionPoint(firstPoint,secondPoint,wall2Check))\
+				<= getDistance(firstPoint,getIntersectionPoint(firstPoint,secondPoint, nearestWall)))
+				nearestWall = wall2Check;
+		}		
+	}
+	return getDistance(firstPoint,getIntersectionPoint(firstPoint,secondPoint,nearestWall));
+}
+
+static Point_s getPoint(Point_s _point,double angle, double hipotenusa)
+{
+	Point_s newPoint;
+	newPoint.x = _point.x + (cos(W_PI - angle)*hipotenusa); //Hago W_PI - angle porque lo paso a coordenadas normales x e y
+	newPoint.y = _point.y + (sin(W_PI - angle)*hipotenusa);
+	return newPoint;
+}
+
+static double getDistance(Point_s A, Point_s B)
+{
+	return sqrt(pow((B.x - A.x), 2) + pow((B.y - A.y), 2));
+}
+
+static double getAngle(uint16_t sensorID)
+{
+	return myRobot.sensorArray[sensorID].angle;
 }

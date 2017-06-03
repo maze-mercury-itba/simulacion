@@ -2,14 +2,21 @@
 #define WORLD_H
 #include <stdint.h>
 #include <stdbool.h>
+#define AMOUNT_OF_SENSORS	10	//puse un numero random
 
 typedef struct 
 {
 	double width, depth, height;	//agregar toda la info necesaria de la forma
 	double direction;				//Direccion hacia la que apunta la parte frontal del Robot.(es un angulo en radianes donde el 0° es el eje y)
 	double velocity;				//[velocity]= cm/ticks (son las unidades de la veocidad).
+	Sensor_s sensorArray[AMOUNT_OF_SENSORS]; //Areglo de sensores
 	Point_s position;
 }Robot_s;
+
+typedef struct {
+	Point_s positionOnRobot;//respecto de la posicion (0,0) del robot
+	double angle;//Respecto de la direccion del robot
+}Sensor_s;
 
 typedef struct
 {
