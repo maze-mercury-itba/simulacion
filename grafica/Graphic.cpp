@@ -20,9 +20,10 @@ Graphic::Graphic(const char * robotPath, uipoint_t robotSize, map_t map, const c
 						robotScaleFactor.x = float(robotSize.x) / float(al_get_bitmap_width(robot));
 						robotScaleFactor.y = float(robotSize.y) / float(al_get_bitmap_height(robot));
 
-						nWalls = map.nWalls;
-						wall = new uivector_t[nWalls];
-						memcpy(wall, map.wall, sizeof(uivector_t)*nWalls);
+						this->map.nWalls = map.nWalls;
+						this->map.target = map.target;
+						this->map.wall = new uivector_t[map.nWalls];
+						memcpy(this->map.wall, map.wall, sizeof(uivector_t)*map.nWalls);
 					}
 					else {
 						fprintf(stderr, "Unable to load background\n");
@@ -67,8 +68,8 @@ Graphic::~Graphic()
 		robot = NULL;
 		al_destroy_display(display);
 		display = NULL;
-		delete[] wall;
-		wall = NULL;
+		delete[] map.wall;
+		map.wall = NULL;
 	}
 }
 
@@ -80,10 +81,12 @@ void Graphic::drawBackground()
 		al_draw_scaled_bitmap(background, 0, 0, al_get_bitmap_width(background), al_get_bitmap_height(background),
 			0, 0, DISP_WIDTH, DISP_HEIGHT, 0);
 
-	for (unsigned int i = 0; i<nWalls; i++) {
-		al_draw_line(wall[i].start.x, wall[i].start.y, wall[i].end.x, wall[i].end.y,
+	for (unsigned int i = 0; i<map.nWalls; i++) {
+		al_draw_line(map.wall[i].start.x, map.wall[i].start.y, map.wall[i].end.x, map.wall[i].end.y,
 			al_map_rgb(0, 0, 0), WALL_THICKNESS);
 	}
+
+	al_draw_filled_circle(map.target.x, map.target.y, 5, al_map_rgb(255, 0, 0));	//dibujar el target
 }
 
 void Graphic::drawRobot(position_t pos)

@@ -15,6 +15,8 @@ public:
 	Graphic(const char * robotPath, uipoint_t robotSize, map_t map, const char * backgroundPath = NULL);
 	~Graphic();
 
+	ALLEGRO_DISPLAY * getDisplay();
+
 	void drawBackground();
 	void drawRobot(position_t pos);
 	void showChanges();
@@ -24,8 +26,6 @@ public:
 	void showWinMsg();
 	void showLoseMsg();
 
-	ALLEGRO_DISPLAY * getDisplay();
-
 private:
 	bool isValid;
 
@@ -33,8 +33,7 @@ private:
 
 	ALLEGRO_BITMAP * robot;
 	ALLEGRO_BITMAP * background;
-	uint16_t nWalls;
-	uivector_t * wall;
+	map_t map;
 
 	fpoint_t robotScaleFactor;
 };

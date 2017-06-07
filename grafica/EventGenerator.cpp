@@ -62,7 +62,7 @@ uint16_t EventGenerator::getNextEvent()
 	uint16_t evCode = NO_EVENT;
 	ALLEGRO_EVENT ev;
 
-	if (al_get_next_event(evQ, &ev)) {
+	if (al_get_next_event(evQ, &ev)) {  //faltan los eventos de display!!
 		if (ev.type == ALLEGRO_EVENT_TIMER) {
 			if (ev.timer.source == frameRateTimer)
 				evCode = FRAME_TIMEOUT;
@@ -88,11 +88,11 @@ uint16_t EventGenerator::getNextEvent()
 				evCode = (ev.type == ALLEGRO_EVENT_KEY_UP ? RIGHT_UP :RIGHT_DOWN);
 				break;
 
+				// ESTOS HANDLERS DE EVENTOS NO VAN A QUEDAR ACA!!
 			case ALLEGRO_KEY_F:
 				if (ev.type == ALLEGRO_EVENT_KEY_UP && al_get_timer_speed(simulationTimer) > MIN_SIMULATION_TIMER)
 					al_set_timer_speed(simulationTimer, al_get_timer_speed(simulationTimer) - STEP_SIMULATION_TIMER);
 				break;
-
 
 			case ALLEGRO_KEY_S:
 				if (ev.type == ALLEGRO_EVENT_KEY_UP && al_get_timer_speed(simulationTimer) < MAX_SIMULATION_TIMER)

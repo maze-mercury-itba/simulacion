@@ -1,6 +1,8 @@
 #include "World.h"
 #include "EventGenerator.h"
 #include "Graphic.h"
+#include "senact.h"
+#include "Intelligence.h"
 #include <allegro5\allegro.h>
 
 
@@ -26,16 +28,23 @@ int main(void)
 	g.showChanges();
 
 	W_Init(&map);
+	I_Init(0);
 	W_setRobotConfiguration(&r);
-	EventGenerator e((ALLEGRO_DISPLAY *)NULL);
+	S_setActuatorError(0, NULL);
+	S_setSensorError(0, NULL);
+	EventGenerator e(g.getDisplay());
 	uint16_t ev = NO_EVENT;
 
+
+	//Orden de updates: mundo, sensores y actuadores, inteligencia. Es importante.
 	do {
 		ev = e.getNextEvent();
 
 		switch (ev) {
 		case SIMULATION_TIMEOUT:
 			worldState = W_Update();
+			S_Update();	//en estas dos funcs habria que verificar el error
+			I_Update();
 			
 			switch (worldState) {
 			case GAMEOVER:
@@ -53,13 +62,15 @@ int main(void)
 		case FRAME_TIMEOUT:
 			g.drawBackground();
 			g.drawRobot(W_getRobotPosition());
+			S_getAmountSen(); // aca mostras lo que te devuelve sen&act de alguna manera
+			S_getAmountAct(); 
 			g.showChanges();
 			break;
 
 
 		default:
 			if (ev!=NO_EVENT)
-				funcion_turbia(ev);
+				I_Drive(&ev); //si el evento no es para mi, es para la inteligencia
 			break;
 		}
 
