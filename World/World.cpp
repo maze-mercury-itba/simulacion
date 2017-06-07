@@ -1,5 +1,6 @@
+
 #include "World.h"
-#include <math.h>
+#include <cmath>
 #define W_PI       3.14159265358979323846
 #define MAX_HIPO	100
 
@@ -8,13 +9,19 @@ static Robot_s myRobot;
 
 static Point_s getNextHipoteticRobotPosition(void);
 static uint16_t hasCrashedWithWall(Point_s previousPoint, Point_s nextPoint);
-static bool onSegment(Point_s p, Point_s q, Point_s r);
+static bool	onSegment(Point_s p, Point_s q, Point_s r);
 static int orientation(Point_s p, Point_s q, Point_s r);
 static bool doIntersect(Point_s p1, Point_s q1, Point_s p2, Point_s q2);
 static double max(double x, double y);
 static double min(double x, double y);
 static double calculatePendient(Point_s firstPoint, Point_s secondPoint);
 static Point_s getIntersectionPoint(Point_s start, Point_s end, Wall_s wall);
+static double getMinDistance(double _angle, uint16_t sensorID);
+static Point_s getPoint(Point_s _point,double angle, double hipotenusa);
+static double getDistance(Point_s A, Point_s B);
+static double getAngle(uint16_t sensorID);
+static Point_s getSensorPointOnMap(double _angle, uint16_t sensorID);
+
 
 int16_t W_Init(Map_s * mapInfo)
 {
@@ -22,11 +29,30 @@ int16_t W_Init(Map_s * mapInfo)
 	return false;
 }
 
+
 void W_setRobotConfiguration(Robot_s * _myRobot)
 {
 	myRobot = *_myRobot;
 	return;
 }
+
+
+bool W_configureRobot(uint16_t _direction, uint16_t _velocity)
+{
+	if((_direction>0)&&(_direction<(2*W_PI)))
+		myRobot.direction = _direction;
+	else
+		return false;
+	myRobot.velocity = _velocity;
+	return true;
+}
+
+
+Point_s W_getRobotPosition(void)
+{
+	return myRobot.position;
+}
+
 
 int16_t W_Update(void)
 {
@@ -44,6 +70,7 @@ int16_t W_Update(void)
 	}
 }
 
+
 sensData_t W_getSensorData(uint16_t sensorID)
 {
 	sensData_t answer;
@@ -52,12 +79,16 @@ sensData_t W_getSensorData(uint16_t sensorID)
 	return answer;
 }
 
+
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 static Point_s getNextHipoteticRobotPosition(void)
 {
-	double _direction = W_PI - myRobot.direction;	//Solamente paso el angulo que esta con respecto del eje y hacia angulos con respecto del eje x asi se hacen mas facil las cuentas
+	double _direction = (W_PI/2) - myRobot.direction;	//Solamente paso el angulo que esta con respecto del eje y hacia angulos con respecto del eje x asi se hacen mas facil las cuentas
 	Point_s _nextPoint;
-	_nextPoint.x = cos(_direction) * myRobot.velocity;
-	_nextPoint.y = sin(_direction) * myRobot.velocity;
+	_nextPoint.x = (uint16_t)(cos(_direction) * myRobot.velocity);
+	_nextPoint.y = (uint16_t)(sin(_direction) * myRobot.velocity);
 	return _nextPoint;
 }
 
@@ -79,7 +110,6 @@ static uint16_t hasCrashedWithWall(Point_s previousPoint, Point_s nextPoint)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 //set de funciones obtenidas de http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/ 
 //Y ya probadas supuestamente.
 static bool onSegment(Point_s p, Point_s q, Point_s r)		//Funcion que checkea si el punto q se encuentra dentro del caudrado q forma segmento que forman p con r
@@ -170,18 +200,20 @@ static Point_s getIntersectionPoint(Point_s start, Point_s end, Wall_s wall)
 {
 	Point_s answer;
 	//Estos calculos fueron hechos previamente por IAN, solamente copie la formula final que me quedo
-	answer.x = (wall.start.y - (calculatePendient(wall.start, wall.end) * wall.start.x)) / (calculatePendient(start, end)\
-		- calculatePendient(wall.start, wall.end));
-	answer.y = (calculatePendient(start, end) * answer.x);
+	answer.x = (uint16_t)((wall.start.y - (calculatePendient(wall.start, wall.end) * wall.start.x)) / (calculatePendient(start, end)\
+		- calculatePendient(wall.start, wall.end)));
+	answer.y = (uint16_t)(calculatePendient(start, end) * answer.x);
 	return answer;
 }
+
 
 static double getMinDistance(double _angle, uint16_t sensorID)
 {
 	uint16_t i;
 	Point_s firstPoint;
-	firstPoint.x = myRobot.position.x + myRobot.sensorArray[sensorID].positionOnRobot.x;
-	firstPoint.y = myRobot.position.y + myRobot.sensorArray[sensorID].positionOnRobot.y;
+	//firstPoint.x = myRobot.position.x + myRobot.sensorArray[sensorID].positionOnRobot.x;
+	//firstPoint.y = myRobot.position.y + myRobot.sensorArray[sensorID].positionOnRobot.y
+	firstPoint = getSensorPointOnMap(_angle,sensorID);
 	Point_s secondPoint = getPoint(firstPoint, _angle, MAX_HIPO);
 	Wall_s wall2Check;
 	Wall_s nearestWall = myMap.walls[0];//inicializacion de nearestWall para que funcione el for
@@ -198,20 +230,37 @@ static double getMinDistance(double _angle, uint16_t sensorID)
 	return getDistance(firstPoint,getIntersectionPoint(firstPoint,secondPoint,nearestWall));
 }
 
+
 static Point_s getPoint(Point_s _point,double angle, double hipotenusa)
 {
 	Point_s newPoint;
-	newPoint.x = _point.x + (cos(W_PI - angle)*hipotenusa); //Hago W_PI - angle porque lo paso a coordenadas normales x e y
-	newPoint.y = _point.y + (sin(W_PI - angle)*hipotenusa);
+	newPoint.x = (uint16_t)(_point.x + (cos((W_PI/2) - angle)*hipotenusa)); //Hago W_PI/2 - angle porque lo paso a coordenadas normales x e y
+	newPoint.y = (uint16_t)(_point.y + (sin((W_PI/2) - angle)*hipotenusa));
 	return newPoint;
 }
+
 
 static double getDistance(Point_s A, Point_s B)
 {
 	return sqrt(pow((B.x - A.x), 2) + pow((B.y - A.y), 2));
 }
 
+
 static double getAngle(uint16_t sensorID)
 {
 	return myRobot.sensorArray[sensorID].angle;
 }
+
+
+static Point_s getSensorPointOnMap(double _angle, uint16_t sensorID)//PENSAR BIEN LAS CUENTAS!!!!!!!
+{
+	Point_s cero;
+	cero.x = 0;
+	cero.y = 0;
+	double radius = getDistance(cero,myRobot.sensorArray[sensorID].positionOnRobot);
+	Point_s answer;
+	answer.x = myRobot.position.x + radius * cos((W_PI/2) - _angle);
+	answer.y = myRobot.position.y + radius * sin((W_PI/2) - _angle);
+	return answer;
+}
+

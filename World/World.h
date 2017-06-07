@@ -1,8 +1,19 @@
 #ifndef WORLD_H
 #define WORLD_H
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+
 #define AMOUNT_OF_SENSORS	10	//puse un numero random
+
+typedef struct
+{
+	uint16_t x;
+	uint16_t y;
+}Point_s;
+
+typedef struct {
+	Point_s positionOnRobot;//respecto de la posicion (0,0) del robot
+	double angle;//Respecto de la direccion del robot
+}Sensor_s;
 
 typedef struct 
 {
@@ -14,22 +25,9 @@ typedef struct
 }Robot_s;
 
 typedef struct {
-	Point_s positionOnRobot;//respecto de la posicion (0,0) del robot
-	double angle;//Respecto de la direccion del robot
-}Sensor_s;
-
-typedef struct
-{
-	uint16_t x;
-	uint16_t y;
-}Point_s;
-
-typedef struct {
 	Point_s start, end;
 	double inclination;
 	int8_t thickness;
-	Wall_s * previousWall;	//Wall que conecta con el punto start de esta Wall, en caso de q no conecte con ninguna Wall se deja esta variable en NULL
-	Wall_s * nextWall;		//Analogo a previousWall.
 }Wall_s;
 
 typedef struct
@@ -51,7 +49,6 @@ void W_setRobotConfiguration(Robot_s * _myRobot);
 sensData_t W_getSensorData(uint16_t sensorID);	//despues el sensor se fija que significa esto para este sensor
 bool W_configureRobot(uint16_t _direction, uint16_t _velocity);
 
-void * W_getRobotPosition(void);//PUSE QUE AHORA DEVUELVE UN VOID * YA QUE LA DIRECCION DEL ROBOT NO SE ENCUENTRA MAS EN POINT_S, SINO
-								//EN ROBOT_S, ENTONCES ESTA FUNCION DEVUELVE UN ARREGLO DE PUNTEROS CON UN POINT_S Y UN DOUBLE.
+Point_s W_getRobotPosition(void);
 
 #endif //WORLD_H
