@@ -1,7 +1,16 @@
 #include <stdio.h>
+#include <stdint.h>
+#include "FileHandler.h"
 
+static double info[F_MAX_AMOUNT_OF_DATA];
 
-static double info[MAX_AMUNT_OF_DATA];
+static double F_getInfo (uint16_t order)
+{
+	if(order > F_MAX_AMOUNT_OF_DATA)
+		return F_ERROR_WAYD;
+	return info[order];
+}
+
 
 int16_t F_Startup (char * filename)
 {
@@ -53,10 +62,4 @@ double F_getSensorAngle (uint16_t sensornumber)
 	return F_getInfo((sensornumber*4)+13);
 }
 
-static double F_getInfo (uint16_t order)
-{
-	if(order > MAX_AMUNT_OF_DATA)
-		return F_ERROR_WAYD;
-	return info[order];
-}
 

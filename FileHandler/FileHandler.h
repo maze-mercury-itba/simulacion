@@ -19,6 +19,8 @@ double F_getSensorYPos (uint16_t sensornumber);
 
 double F_getSensorAngle (uint16_t sensornumber);
 
+uint16_t F_getBasicInfo (uint16_t order);
+
 #endif
 
 /*
@@ -34,3 +36,5 @@ some use of dynamic memory may came in future updates
 
 2nd and last: get the info you need!
 	this is fast, you can use it without needing to save it in local variables!!
+
+*/
