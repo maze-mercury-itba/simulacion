@@ -21,5 +21,11 @@ typedef struct { int16_t x, y;} ipoint_t;
 
 typedef struct { ipoint_t start, end; } ivector_t;
 
+typedef struct
+{
+	double x;
+	double y;
+}Point_t;
+
 
 #endif //VECTOR_H
