@@ -94,8 +94,8 @@ static Point_t getNextHipoteticRobotPosition(void)
 {
 	double _direction = (W_PI/2) - myRobot.direction;	//Solamente paso el angulo que esta con respecto del eje y hacia angulos con respecto del eje x asi se hacen mas facil las cuentas
 	Point_t _nextPoint;
-	_nextPoint.x = cos(_direction) * myRobot.velocity;
-	_nextPoint.y = sin(_direction) * myRobot.velocity;
+	_nextPoint.x = myRobot.position.x + cos(_direction) * myRobot.velocity;
+	_nextPoint.y = myRobot.position.y + sin(_direction) * myRobot.velocity;
 	return _nextPoint;
 }
 
