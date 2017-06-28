@@ -49,7 +49,7 @@ RobotState_t W_Update(void);				//Avanzar la simulacion. devuelve codigo de erro
 void W_setRobotConfiguration(Robot_t * _myRobot);
 
 sensData_t W_getSensorData(uint16_t sensorID);	//despues el sensor se fija que significa esto para este sensor
-bool W_configureRobot(uint16_t _direction, uint16_t _velocity);
+bool W_configureRobot(double _direction, double _velocity);
 
 RobotPosition_t W_getRobotPosition(void);
 

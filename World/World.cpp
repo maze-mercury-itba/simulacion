@@ -12,22 +12,22 @@ typedef struct
 static Map_t myMap;
 static Robot_t myRobot;
 
-static Point_t getNextHipoteticRobotPosition(void);//BIEN    (CASTEA A INT, NO SE SI ESTA TAN BUENO)
-static uint16_t hasCrashedWithWall(Point_t previousPoint, Point_t nextPoint);//
+static Point_t getNextHipoteticRobotPosition(void);//BIEN
+static uint16_t hasCrashedWithWall(Point_t previousPoint, Point_t nextPoint);//BIEN (PONELE)
 static bool	onSegment(Point_t p, Point_t q, Point_t r);
 static int orientation(Point_t p, Point_t q, Point_t r);
-static bool doIntersect(Point_t p1, Point_t q1, Point_t p2, Point_t q2);
-static double max(double x, double y);
-static double min(double x, double y);
-static double calculatePendient(Point_t firstPoint, Point_t secondPoint);
-static Point_t getIntersectionPoint(Point_t start, Point_t end, Wall_t wall);
+static bool doIntersect(Point_t p1, Point_t q1, Point_t p2, Point_t q2);//BIEN
+static double max(double x, double y);//BIEN
+static double min(double x, double y);//BIEN
+static double calculatePendient(Point_t firstPoint, Point_t secondPoint);//BIEN
+static Point_t getIntersectionPoint(Point_t start, Point_t end, Wall_t wall);//BIEN
 static double getMinDistance(double _angle, uint16_t sensorID);
 static Point_t getPoint(Point_t _point,double angle, double hipotenusa);
 static double getDistance(Point_t A, Point_t B);
 static double getAngle(uint16_t sensorID);
 static Point_t getSensorPointOnMap(double _angle, uint16_t sensorID);
-static PointsStructure_t setPoints(Point_t firstPoint);
-static void moveRobotToTouchedWall(Wall_t wallTouched, Point_t prevPoint, Point_t nextPoint);
+static PointsStructure_t setPoints(Point_t firstPoint);//BIEN
+static void moveRobotToTouchedWall(Wall_t wallTouched, Point_t prevPoint, Point_t nextPoint);//BIEN
 
 
 int16_t W_Init(Map_t * mapInfo)
@@ -42,7 +42,7 @@ void W_setRobotConfiguration(Robot_t * _myRobot)
 	return;
 }
 
-bool W_configureRobot(uint16_t _direction, uint16_t _velocity)
+bool W_configureRobot(double _direction, double _velocity)
 {
 	if((_direction>0)&&(_direction<(2*W_PI)))
 		myRobot.direction = _direction;
@@ -94,8 +94,8 @@ static Point_t getNextHipoteticRobotPosition(void)
 {
 	double _direction = (W_PI/2) - myRobot.direction;	//Solamente paso el angulo que esta con respecto del eje y hacia angulos con respecto del eje x asi se hacen mas facil las cuentas
 	Point_t _nextPoint;
-	_nextPoint.x = (uint16_t)(cos(_direction) * myRobot.velocity);
-	_nextPoint.y = (uint16_t)(sin(_direction) * myRobot.velocity);
+	_nextPoint.x = cos(_direction) * myRobot.velocity;
+	_nextPoint.y = sin(_direction) * myRobot.velocity;
 	return _nextPoint;
 }
 
@@ -124,7 +124,7 @@ static uint16_t hasCrashedWithWall(Point_t previousPoint, Point_t nextPoint)
 				distance = getDistance(newPoint, prevPoints.firstPoint);
 			}
 		}
-		else if (doIntersect(prevPoints.secondPoint, nextPoints.secondPoint, wall2Check.start, wall2Check.end))
+		if (doIntersect(prevPoints.secondPoint, nextPoints.secondPoint, wall2Check.start, wall2Check.end))
 		{
 			Point_t newPoint = getIntersectionPoint(prevPoints.secondPoint, nextPoints.secondPoint, myMap.walls[i]);
 			if (getDistance(newPoint, prevPoints.secondPoint) < distance)
@@ -133,7 +133,7 @@ static uint16_t hasCrashedWithWall(Point_t previousPoint, Point_t nextPoint)
 				distance = getDistance(newPoint, prevPoints.secondPoint);
 			}
 		}
-		else if (doIntersect(prevPoints.thirdPoint, nextPoints.thirdPoint, wall2Check.start, wall2Check.end))
+		if (doIntersect(prevPoints.thirdPoint, nextPoints.thirdPoint, wall2Check.start, wall2Check.end))
 		{
 			Point_t newPoint = getIntersectionPoint(prevPoints.thirdPoint, nextPoints.thirdPoint, myMap.walls[i]);
 			if (getDistance(newPoint, prevPoints.thirdPoint) < distance)
@@ -142,7 +142,7 @@ static uint16_t hasCrashedWithWall(Point_t previousPoint, Point_t nextPoint)
 				distance = getDistance(newPoint, prevPoints.thirdPoint);
 			}
 		}
-		else if (doIntersect(prevPoints.lastPoint, nextPoints.lastPoint, wall2Check.start, wall2Check.end))
+		if (doIntersect(prevPoints.lastPoint, nextPoints.lastPoint, wall2Check.start, wall2Check.end))
 		{
 			Point_t newPoint = getIntersectionPoint(prevPoints.lastPoint, nextPoints.lastPoint, myMap.walls[i]);
 			if (getDistance(newPoint, prevPoints.lastPoint) < distance)
@@ -172,8 +172,8 @@ static int orientation(Point_t p, Point_t q, Point_t r)
 {
 	// See http://www.geeksforgeeks.org/orientation-3-ordered-points/
 	// for details of below formula.
-	int val = (q.y - p.y) * (r.x - q.x) -
-		(q.x - p.x) * (r.y - q.y);
+	int val = (int)((q.y - p.y) * (r.x - q.x) -
+		(q.x - p.x) * (r.y - q.y));
 
 	if (val == 0)
 		return 0;  // colinear
@@ -258,8 +258,6 @@ static double getMinDistance(double _angle, uint16_t sensorID)
 {
 	uint16_t i;
 	Point_t firstPoint;
-	//firstPoint.x = myRobot.position.x + myRobot.sensorArray[sensorID].positionOnRobot.x;
-	//firstPoint.y = myRobot.position.y + myRobot.sensorArray[sensorID].positionOnRobot.y
 	firstPoint = getSensorPointOnMap(_angle,sensorID);
 	Point_t secondPoint = getPoint(firstPoint, _angle, MAX_HIPO);
 	Wall_t wall2Check;
@@ -280,8 +278,8 @@ static double getMinDistance(double _angle, uint16_t sensorID)
 static Point_t getPoint(Point_t _point,double angle, double hipotenusa)
 {
 	Point_t newPoint;
-	newPoint.x = (uint16_t)(_point.x + (cos((W_PI/2) - angle)*hipotenusa)); //Hago W_PI/2 - angle porque lo paso a coordenadas normales x e y
-	newPoint.y = (uint16_t)(_point.y + (sin((W_PI/2) - angle)*hipotenusa));
+	newPoint.x = (_point.x + (cos((W_PI/2) - angle)*hipotenusa)); //Hago W_PI/2 - angle porque lo paso a coordenadas normales x e y
+	newPoint.y = (_point.y + (sin((W_PI/2) - angle)*hipotenusa));
 	return newPoint;
 }
 
@@ -295,15 +293,15 @@ static double getAngle(uint16_t sensorID)
 	return myRobot.sensorArray[sensorID].angle;
 }
 
-static Point_t getSensorPointOnMap(double _angle, uint16_t sensorID)//PENSAR BIEN LAS CUENTAS!!!!!!!
+static Point_t getSensorPointOnMap(double _angle, uint16_t sensorID)//Chequear las cuentas de esta funcion que probablemente estenb mal
 {
-	Point_t cero;
+	/*Point_t cero;
 	cero.x = 0;
 	cero.y = 0;
-	double radius = getDistance(cero,myRobot.sensorArray[sensorID].positionOnRobot);
+	double radius = getDistance(cero,myRobot.sensorArray[sensorID].positionOnRobot);*/
 	Point_t answer;
-	answer.x = myRobot.position.x + radius * cos((W_PI/2) - _angle);
-	answer.y = myRobot.position.y + radius * sin((W_PI/2) - _angle);
+	answer.x = myRobot.position.x + cos(myRobot.direction) * myRobot.sensorArray[sensorID].positionOnRobot.x;
+	answer.y = myRobot.position.y + sin(myRobot.direction) * myRobot.sensorArray[sensorID].positionOnRobot.y;
 	return answer;
 }
 
