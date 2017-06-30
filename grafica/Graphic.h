@@ -1,8 +1,8 @@
 #pragma once
 #include <allegro5\allegro.h>
 #include <allegro5\allegro_image.h>
-#include "vector.h"
-#include "World.h"
+#include "../vector.h"
+#include "../World/World.h"
 
 #define DISP_WIDTH		800
 #define	DISP_HEIGHT		600	
@@ -12,7 +12,7 @@
 class Graphic
 {
 public:
-	Graphic(const char * robotPath, uipoint_t robotSize, map_t map, const char * backgroundPath = NULL);
+	Graphic(const char * robotPath, uidpoint_t robotSize, map_t map, const char * backgroundPath = NULL);
 	~Graphic();
 
 	ALLEGRO_DISPLAY * getDisplay();
@@ -35,5 +35,5 @@ private:
 	ALLEGRO_BITMAP * background;
 	map_t map;
 
-	fpoint_t robotScaleFactor;
+	fdpoint_t robotScaleFactor;
 };
