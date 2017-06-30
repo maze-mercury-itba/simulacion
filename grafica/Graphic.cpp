@@ -3,7 +3,7 @@
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_native_dialog.h>
 
-Graphic::Graphic(const char * robotPath, uipoint_t robotSize, map_t map, const char * backgroundPath)
+Graphic::Graphic(const char * robotPath, uidpoint_t robotSize, map_t map, const char * backgroundPath)
 {
 	display = NULL;
 	robot = NULL;
@@ -22,8 +22,8 @@ Graphic::Graphic(const char * robotPath, uipoint_t robotSize, map_t map, const c
 
 						this->map.nWalls = map.nWalls;
 						this->map.target = map.target;
-						this->map.wall = new uivector_t[map.nWalls];
-						memcpy(this->map.wall, map.wall, sizeof(uivector_t)*map.nWalls);
+						this->map.walls = new dvector_t[map.nWalls];
+						memcpy(this->map.walls, map.walls, sizeof(dvector_t)*map.nWalls);
 					}
 					else {
 						fprintf(stderr, "Unable to load background\n");
@@ -68,8 +68,8 @@ Graphic::~Graphic()
 		robot = NULL;
 		al_destroy_display(display);
 		display = NULL;
-		delete[] map.wall;
-		map.wall = NULL;
+		delete[] map.walls;
+		map.walls = NULL;
 	}
 }
 
@@ -82,7 +82,7 @@ void Graphic::drawBackground()
 			0, 0, DISP_WIDTH, DISP_HEIGHT, 0);
 
 	for (unsigned int i = 0; i<map.nWalls; i++) {
-		al_draw_line(map.wall[i].start.x, map.wall[i].start.y, map.wall[i].end.x, map.wall[i].end.y,
+		al_draw_line(map.walls[i].start.x, map.walls[i].start.y, map.walls[i].end.x, map.walls[i].end.y,
 			al_map_rgb(0, 0, 0), WALL_THICKNESS);
 	}
 
@@ -91,8 +91,7 @@ void Graphic::drawBackground()
 
 void Graphic::drawRobot(position_t pos)
 {
-	al_draw_scaled_rotated_bitmap(robot, al_get_bitmap_width(robot)/2, al_get_bitmap_height(robot)/2,
-		pos.coord.x, pos.coord.y, robotScaleFactor.x, robotScaleFactor.y, pos.direction, 0);
+	al_draw_scaled_rotated_bitmap(robot, 0, 0, pos.position.x, pos.position.y, robotScaleFactor.x, robotScaleFactor.y, pos.angle, 0);
 }
 
 void Graphic::showChanges()

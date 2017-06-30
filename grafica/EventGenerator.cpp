@@ -55,6 +55,7 @@ EventGenerator::~EventGenerator()
 	frameRateTimer = NULL;
 	al_destroy_event_queue(evQ);
 	evQ = NULL;
+	al_uninstall_keyboard();
 }
 
 uint16_t EventGenerator::getNextEvent()

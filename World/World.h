@@ -1,36 +1,31 @@
 #ifndef WORLD_H
 #define WORLD_H
 #include <cstdint>
-#include "vector.h"
+#include "../vector.h"
 
 #define AMOUNT_OF_SENSORS	10	//puse un numero random
-typedef enum {NOTHING_HAPPENED, CRASHED, ARRIVED_2_TARGET}RobotState_t;
+typedef enum {NOTHING_HAPPENED, CRASHED, ARRIVED_2_TARGET}robotState_t;
 
 typedef struct {
-	Point_t positionOnRobot;//respecto de la posicion (0,0) del robot
+	dpoint_t positionOnRobot;//respecto de la posicion (0,0) del robot
 	double angle;//Respecto de la direccion del robot
-}Sensor_t;
+}sensor_t;
 
 typedef struct 
 {
 	double width, depth, height;	//agregar toda la info necesaria de la forma
 	double direction;				//Direccion hacia la que apunta la parte frontal del Robot.(es un angulo en radianes donde el 0° es el eje y)
 	double velocity;				//[velocity]= cm/ticks (son las unidades de la veocidad).
-	Sensor_t sensorArray[AMOUNT_OF_SENSORS]; //Areglo de sensores
-	Point_t position;
-}Robot_t;
-
-typedef struct {
-	Point_t start, end;
-	int8_t thickness;
-}Wall_t;
+	sensor_t sensorArray[AMOUNT_OF_SENSORS]; //Areglo de sensores
+	dpoint_t position;
+}robot_t;
 
 typedef struct
 {
 	uint16_t nWalls;	//cantidad de elementos en el arreglo wall
-	Wall_t * walls;	//arreglo de vectores que indican donde esta cada pared
-	Point_t target;
-}Map_t;
+	dvector_t * walls;	//arreglo de vectores que indican donde esta cada pared
+	dpoint_t target;
+}map_t;
 
 typedef struct
 {
@@ -41,16 +36,16 @@ typedef struct
 typedef struct 
 {
 	double angle;
-	Point_t position;
-}RobotPosition_t;
+	dpoint_t position;
+}position_t;
 
-int16_t W_Init(Map_t * mapInfo);	//Set map
-RobotState_t W_Update(void);				//Avanzar la simulacion. devuelve codigo de error, o de si choco o no, o ambos
-void W_setRobotConfiguration(Robot_t * _myRobot);
+int16_t W_Init(map_t * mapInfo);	//Set map
+robotState_t W_Update(void);				//Avanzar la simulacion. devuelve codigo de error, o de si choco o no, o ambos
+void W_setRobotConfiguration(robot_t * _myRobot);
 
 sensData_t W_getSensorData(uint16_t sensorID);	//despues el sensor se fija que significa esto para este sensor
 bool W_configureRobot(double _direction, double _velocity);
 
-RobotPosition_t W_getRobotPosition(void);
+position_t W_getRobotPosition(void);
 
 #endif //WORLD_H
