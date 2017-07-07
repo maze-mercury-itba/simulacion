@@ -31,6 +31,7 @@ static PointsStructure_t setPoints(dpoint_t firstPoint);//BIEN
 static void moveRobotToTouchedWall(dvector_t wallTouched, dpoint_t prevPoint, dpoint_t nextPoint);
 static bool ifVertical(dpoint_t p1, dpoint_t p2);
 static bool ifHorizontal(dpoint_t p1, dpoint_t p2);
+dpoint_t absolutePoint(dpoint_t point);
 //bool doIntersect(dpoint_t s1p1, dpoint_t s1p2, dvector_t wall);
 
 
@@ -287,7 +288,8 @@ static dpoint_t getIntersectionPoint(dpoint_t start, dpoint_t end, dvector_t wal
 	//Estos calculos fueron hechos previamente por IAN, solamente copie la formula final que me quedo
 	if (end.x != start.x && wall.end.x != wall.start.x)
 	{
-		answer.x = ((start.y - calculatePendient(start, end)*start.x) - (wall.start.y - calculatePendient(wall.start, wall.end) * wall.start.x)) / (calculatePendient(wall.start, wall.end) - calculatePendient(start, end));
+		answer.x = ((start.y - calculatePendient(start, end)*start.x) - (wall.start.y - calculatePendient(wall.start, wall.end) * wall.start.x)) / 
+					(calculatePendient(wall.start, wall.end) - calculatePendient(start, end));
 		answer.y = calculatePendient(start, end) * answer.x + (start.y - calculatePendient(start, end)*start.x);
 	}
 	if(end.x == start.x && wall.end.x != wall.start.x)
@@ -475,4 +477,12 @@ static bool ifHorizontal(dpoint_t p1, dpoint_t p2)
 	if (p1.y == p2.y)
 		return true;
 	return false;
+}
+
+dpoint_t absolutePoint(dpoint_t point)
+{
+	dpoint_t answer;
+	answer.x = myRobot.position.x + point.y * (sin(myRobot.rotation)) - (point.x * cos(myRobot.rotation));
+	answer.y = myRobot.position.y - point.y * (cos(myRobot.rotation)) - (point.x * sin(myRobot.rotation));
+	return answer;
 }
