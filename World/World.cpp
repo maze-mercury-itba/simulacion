@@ -55,13 +55,30 @@ bool W_configureRobot(double _direction, double _velocity, double _rotation)
 	return true;
 }
 
-position_t W_getRobotPosition(void)
+//position_t W_getRobotPosition(void) //Devuelve la esquina superior izquierda del robot
+//{
+//	position_t answer;
+//	answer.angle = myRobot.direction;
+//	answer.position = myRobot.position;
+//	return answer;
+//}
+
+position_t W_getRobotPosition(void) //Devuelve el centro del robot
 {
-	position_t answer;
-	answer.angle = myRobot.direction;
-	answer.position = myRobot.position;
-	return answer;
+	position_t center;
+	center.angle = myRobot.direction;
+
+	PointsStructure_t robotPos;
+	robotPos = setPoints(myRobot.position);
+
+	dvector_t diagonal;
+	diagonal.start = robotPos.firstPoint;
+	diagonal.end = robotPos.lastPoint;
+
+	center.position = getIntersectionPoint(robotPos.secondPoint, robotPos.thirdPoint, diagonal);
+	return center;
 }
+
 
 robotState_t W_Update(void)
 {
