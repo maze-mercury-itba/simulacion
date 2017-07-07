@@ -48,5 +48,6 @@ sensData_t W_getSensorData(uint16_t sensorID);	//despues el sensor se fija que s
 bool W_configureRobot(double _direction, double _velocity, double _rotation);
 
 position_t W_getRobotPosition(void);
+dpoint_t absolutePoint(dpoint_t point);
 
 #endif //WORLD_H
