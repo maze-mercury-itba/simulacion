@@ -6,6 +6,6 @@
 int main (void)
 {
 	F_Startup("holapaola.txt");
-	printf("%u\n",F_getBasicInfo(1) );
+	printf("%u\n",F_getBasicInfo(getchar()-'0') );
 
 }

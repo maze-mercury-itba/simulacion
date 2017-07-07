@@ -19,7 +19,7 @@ int16_t F_Startup (char * filename)
 	fp = fopen(filename,"r");
 	if(fp)
 	{
-		while(fscanf(fp,"%lf",info[counter++]) != 0)
+		while(fscanf(fp,"%lf",&info[counter++]) != EOF && counter < F_MAX_AMOUNT_OF_DATA)
 		{
 		}
 
