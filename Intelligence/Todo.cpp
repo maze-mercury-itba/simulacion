@@ -22,7 +22,7 @@ uint16_t S_getAmountAct(void) { return 0; }
 
 
 // Mantenimiento
-uint16_t S_Update(void) { W_configureRobot(robot.direction, robot.velocity); return 0; }
+uint16_t S_Update(void) { W_configureRobot(robot.direction, robot.velocity,0); return 0; }
 
 // Configuracion
 uint16_t S_setSensorError(sensor_id, void*) { return 0; }

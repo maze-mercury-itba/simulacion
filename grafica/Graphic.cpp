@@ -91,7 +91,7 @@ void Graphic::drawBackground()
 
 void Graphic::drawRobot(position_t pos)
 {
-	al_draw_scaled_rotated_bitmap(robot, 0, 0, pos.position.x, pos.position.y, robotScaleFactor.x, robotScaleFactor.y, pos.angle, 0);
+	al_draw_scaled_rotated_bitmap(robot, 0, 0, pos.position.x, pos.position.y, robotScaleFactor.x, robotScaleFactor.y, 0, 0);
 }
 
 void Graphic::showChanges()

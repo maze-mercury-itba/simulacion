@@ -16,7 +16,7 @@ int main(void)
 		return EXIT_FAILURE;
 
 	uint16_t worldState = NOTHING_HAPPENED;
-	robot_t r = { 40, 400, 40, 0, 0 }; r.position = { 0, 0 };
+	robot_t r = { 40, 400, 40, 0, 0 }; r.position = { 50,50 };
 	uidpoint_t rSize = {uint16_t(r.width), uint16_t(r.height)};
 	const char robotPath[]=  "grafica/robot.png" ;
 

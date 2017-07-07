@@ -2,6 +2,7 @@
 #include <cmath>
 #define W_PI       3.14159265358979323846
 #define MAX_HIPO	1000
+#define W_ERROR	-1
 
 
 typedef struct
@@ -13,21 +14,24 @@ static map_t myMap;
 static robot_t myRobot;
 
 static dpoint_t getNextHipoteticRobotPosition(void);//BIEN
-static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint);//BIEN (PONELE)
-static bool	onSegment(dpoint_t p, dpoint_t q, dpoint_t r);
-static int orientation(dpoint_t p, dpoint_t q, dpoint_t r);
+static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint);
+static bool	onSegment(dpoint_t p, dpoint_t q, dpoint_t r); //BIEN
+static int orientation(dpoint_t p, dpoint_t q, dpoint_t r); //BIEN
 static bool doIntersect(dpoint_t p1, dpoint_t q1, dpoint_t p2, dpoint_t q2);//BIEN
 static double max(double x, double y);//BIEN
 static double min(double x, double y);//BIEN
 static double calculatePendient(dpoint_t firstPoint, dpoint_t secondPoint);//BIEN
-static dpoint_t getIntersectionPoint(dpoint_t start, dpoint_t end, dvector_t wall);//BIEN
-static double getMinDistance(double _angle, uint16_t sensorID);
-static dpoint_t getPoint(dpoint_t _point,double angle, double hipotenusa);
+static dpoint_t getIntersectionPoint(dpoint_t start, dpoint_t end, dvector_t wall);
+static double getMinDistance(double _angle, uint16_t sensorID);//
+static dpoint_t getPoint(dpoint_t _point, double angle, double hipotenusa);//
 static double getDistance(dpoint_t A, dpoint_t B);
-static double getAngle(uint16_t sensorID);
-static dpoint_t getSensorPointOnMap(double _angle, uint16_t sensorID);
+static double getAngle(uint16_t sensorID);//
+static dpoint_t getSensorPointOnMap(double _angle, uint16_t sensorID);//
 static PointsStructure_t setPoints(dpoint_t firstPoint);//BIEN
-static void moveRobotToTouchedWall(dvector_t wallTouched, dpoint_t prevPoint, dpoint_t nextPoint);//BIEN
+static void moveRobotToTouchedWall(dvector_t wallTouched, dpoint_t prevPoint, dpoint_t nextPoint);
+static bool ifVertical(dpoint_t p1, dpoint_t p2);
+static bool ifHorizontal(dpoint_t p1, dpoint_t p2);
+//bool doIntersect(dpoint_t s1p1, dpoint_t s1p2, dvector_t wall);
 
 
 int16_t W_Init(map_t * mapInfo)
@@ -39,13 +43,15 @@ int16_t W_Init(map_t * mapInfo)
 void W_setRobotConfiguration(robot_t * _myRobot)
 {
 	myRobot = *_myRobot;
+	myRobot.rotation = 0;
 	return;
 }
 
-bool W_configureRobot(double _direction, double _velocity)
+bool W_configureRobot(double _direction, double _velocity, double _rotation)
 {
 	myRobot.direction = _direction;
 	myRobot.velocity = _velocity;
+	myRobot.rotation = _rotation;
 	return true;
 }
 
@@ -69,8 +75,8 @@ robotState_t W_Update(void)
 	}
 	else
 	{
-		dvector_t wallTouched = myMap.walls[hasCrashedWithWall(myRobot.position, nextPosition)-1];
-		moveRobotToTouchedWall(wallTouched,myRobot.position, nextPosition);
+		dvector_t wallTouched = myMap.walls[hasCrashedWithWall(myRobot.position, nextPosition) - 1];
+		moveRobotToTouchedWall(wallTouched, myRobot.position, nextPosition);
 		return CRASHED;
 	}
 }
@@ -78,7 +84,7 @@ robotState_t W_Update(void)
 sensData_t W_getSensorData(uint16_t sensorID)
 {
 	sensData_t answer;
-	answer.angle =  myRobot.direction + getAngle(sensorID);
+	answer.angle = myRobot.direction + getAngle(sensorID);
 	answer.distance = getMinDistance(answer.angle, sensorID);
 	return answer;
 }
@@ -89,10 +95,10 @@ sensData_t W_getSensorData(uint16_t sensorID)
 //Funcion encargada de calular el proximo punto hipotetico del robot, en caso de que no hubiera paredes
 static dpoint_t getNextHipoteticRobotPosition(void)
 {
-	double _direction = (W_PI/2) - myRobot.direction;	//Solamente paso el angulo que esta con respecto del eje y hacia angulos con respecto del eje x asi se hacen mas facil las cuentas
+	double _direction = (W_PI / 2) - myRobot.direction;	//Solamente paso el angulo que esta con respecto del eje y hacia angulos con respecto del eje x asi se hacen mas facil las cuentas
 	dpoint_t _nextPoint;
-	_nextPoint.x = myRobot.position.x + cos(_direction) * myRobot.velocity;
 	_nextPoint.y = myRobot.position.y - sin(_direction) * myRobot.velocity;
+	_nextPoint.x = myRobot.position.x + cos(_direction) * myRobot.velocity;
 	return _nextPoint;
 }
 
@@ -109,12 +115,16 @@ static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint)
 	uint16_t nearWall = 0;
 	double distance = MAX_HIPO;
 	dvector_t wall2Check;
-	for (i = 0;i < myMap.nWalls; i++)
+	for (i = 0; i < myMap.nWalls; i++)
 	{
 		wall2Check = myMap.walls[i];
 		if (doIntersect(prevPoints.firstPoint, nextPoints.firstPoint, wall2Check.start, wall2Check.end))
 		{
-			dpoint_t newPoint = getIntersectionPoint(prevPoints.firstPoint, nextPoints.firstPoint, myMap.walls[i]);
+			dpoint_t newPoint;
+			if (ifVertical(prevPoints.firstPoint, nextPoints.firstPoint) && ifVertical(wall2Check.start, wall2Check.end))
+				newPoint = nextPoints.firstPoint;
+			else
+				newPoint = getIntersectionPoint(prevPoints.firstPoint, nextPoints.firstPoint, myMap.walls[i]);
 			if (getDistance(newPoint, prevPoints.firstPoint) < distance)
 			{
 				nearWall = i+1;
@@ -123,7 +133,11 @@ static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint)
 		}
 		if (doIntersect(prevPoints.secondPoint, nextPoints.secondPoint, wall2Check.start, wall2Check.end))
 		{
-			dpoint_t newPoint = getIntersectionPoint(prevPoints.secondPoint, nextPoints.secondPoint, myMap.walls[i]);
+			dpoint_t newPoint;
+			if (ifVertical(prevPoints.secondPoint, nextPoints.secondPoint) && ifVertical(wall2Check.start, wall2Check.end))
+				newPoint = nextPoints.secondPoint;
+			else
+				newPoint = getIntersectionPoint(prevPoints.secondPoint, nextPoints.secondPoint, myMap.walls[i]);
 			if (getDistance(newPoint, prevPoints.secondPoint) < distance)
 			{
 				nearWall = i+1;
@@ -132,7 +146,11 @@ static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint)
 		}
 		if (doIntersect(prevPoints.thirdPoint, nextPoints.thirdPoint, wall2Check.start, wall2Check.end))
 		{
-			dpoint_t newPoint = getIntersectionPoint(prevPoints.thirdPoint, nextPoints.thirdPoint, myMap.walls[i]);
+			dpoint_t newPoint;
+			if (ifVertical(prevPoints.thirdPoint, nextPoints.thirdPoint) && ifVertical(wall2Check.start, wall2Check.end))
+					newPoint = nextPoints.thirdPoint;
+			else
+				newPoint = getIntersectionPoint(prevPoints.thirdPoint, nextPoints.thirdPoint, myMap.walls[i]);
 			if (getDistance(newPoint, prevPoints.thirdPoint) < distance)
 			{
 				nearWall = i+1;
@@ -141,7 +159,11 @@ static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint)
 		}
 		if (doIntersect(prevPoints.lastPoint, nextPoints.lastPoint, wall2Check.start, wall2Check.end))
 		{
-			dpoint_t newPoint = getIntersectionPoint(prevPoints.lastPoint, nextPoints.lastPoint, myMap.walls[i]);
+			dpoint_t newPoint;
+			if (ifVertical(prevPoints.lastPoint, nextPoints.lastPoint) && ifVertical(wall2Check.start, wall2Check.end))
+				newPoint = nextPoints.lastPoint;
+			else
+				newPoint = getIntersectionPoint(prevPoints.lastPoint, nextPoints.lastPoint, myMap.walls[i]);
 			if (getDistance(newPoint, prevPoints.lastPoint) < distance)
 			{
 				nearWall = i+1;
@@ -231,12 +253,13 @@ static double calculatePendient(dpoint_t firstPoint, dpoint_t secondPoint)
 {
 	double deltaX = secondPoint.x - firstPoint.x;
 	double deltaY = secondPoint.y - firstPoint.y;
-	return (deltaY / deltaX);
+	double answer = deltaY / deltaX;
+	return answer;
 }
 
 /*Funcion que devuelve en donde se intersectan 2 segmentos(recibe 2 puntos y forma un segmento y
 devuelve el punto de interseccion con la Wall
-IMPORTANTE: esta funcion no chequea si hubo interseccion o no, asume que la hubo, en caso de que no halla interseccion y 
+IMPORTANTE: esta funcion no chequea si hubo interseccion o no, asume que la hubo, en caso de que no haya interseccion y 
 esta funcion sea llamada, devuelve basura.
 Recibe: 2 puntos los cuales generan un segmento, y una pared
 Devuelve: el punto de interseccion.
@@ -245,9 +268,21 @@ static dpoint_t getIntersectionPoint(dpoint_t start, dpoint_t end, dvector_t wal
 {
 	dpoint_t answer;
 	//Estos calculos fueron hechos previamente por IAN, solamente copie la formula final que me quedo
-	answer.x = ((start.y - calculatePendient(start, end)*start.x) - (wall.start.y - calculatePendient(wall.start, wall.end) * wall.start.x))
-		/ (calculatePendient(wall.start, wall.end) - calculatePendient(start, end));
-	answer.y = calculatePendient(start,end) * answer.x + (start.y - calculatePendient(start, end)*start.x);
+	if (end.x != start.x && wall.end.x != wall.start.x)
+	{
+		answer.x = ((start.y - calculatePendient(start, end)*start.x) - (wall.start.y - calculatePendient(wall.start, wall.end) * wall.start.x)) / (calculatePendient(wall.start, wall.end) - calculatePendient(start, end));
+		answer.y = calculatePendient(start, end) * answer.x + (start.y - calculatePendient(start, end)*start.x);
+	}
+	if(end.x == start.x && wall.end.x != wall.start.x)
+	{
+		answer.x = start.x;
+		answer.y = (calculatePendient(wall.start, wall.end) * answer.x) + wall.start.y - (calculatePendient(wall.start, wall.end) * wall.start.x);
+	}
+	if (wall.end.x == wall.start.x && end.x != start.x)
+	{
+		answer.x = wall.start.x;
+		answer.y = (calculatePendient(start, end) * answer.x) + start.y - (calculatePendient(start, end) * start.x);
+	}
 	return answer;
 }
 
@@ -304,19 +339,17 @@ static dpoint_t getSensorPointOnMap(double _angle, uint16_t sensorID)
 
 static PointsStructure_t setPoints(dpoint_t firstPoint)
 {
-	double direction = (W_PI / 2) - myRobot.direction;
-	double direction2 = (W_PI / 2) - direction;
 	PointsStructure_t newStructure;
 	newStructure.firstPoint = firstPoint;
 
-	newStructure.secondPoint.x = firstPoint.x + (myRobot.width * cos(myRobot.direction));
-	newStructure.secondPoint.y = firstPoint.y - (myRobot.width * sin(myRobot.direction));
+	newStructure.secondPoint.x = firstPoint.x + (myRobot.width * cos(myRobot.rotation));
+	newStructure.secondPoint.y = firstPoint.y + (myRobot.width * sin(myRobot.rotation));
 
-	newStructure.thirdPoint.x = firstPoint.x - myRobot.height * (sin(myRobot.direction));
-	newStructure.thirdPoint.y = firstPoint.y - myRobot.height * (cos(myRobot.direction));
+	newStructure.thirdPoint.x = firstPoint.x - myRobot.height * (sin(myRobot.rotation));
+	newStructure.thirdPoint.y = firstPoint.y + myRobot.height * (cos(myRobot.rotation));
 
-	newStructure.lastPoint.x = newStructure.thirdPoint.x + (myRobot.width * cos(myRobot.direction));
-	newStructure.lastPoint.y = newStructure.thirdPoint.y - (myRobot.width * sin(myRobot.direction));
+	newStructure.lastPoint.x = newStructure.thirdPoint.x + (myRobot.width * cos(myRobot.rotation));
+	newStructure.lastPoint.y = newStructure.thirdPoint.y + (myRobot.width * sin(myRobot.rotation));
 	return newStructure;
 }
 
@@ -331,49 +364,98 @@ static void moveRobotToTouchedWall(dvector_t wallTouched, dpoint_t prevPoint, dp
 	dpoint_t newPoint;
 	dpoint_t answer;
 	double distance = MAX_HIPO;
-	double direction = (W_PI / 2) - myRobot.direction;
-	double direction2 = (W_PI / 2) - direction;
+
 
 	if (doIntersect(prevPoints.firstPoint, nextPoints.firstPoint, wallTouched.start, wallTouched.end))
 	{
-		newPoint = getIntersectionPoint(prevPoints.firstPoint, nextPoints.firstPoint, wallTouched);
+		if (ifVertical(prevPoints.firstPoint, nextPoints.firstPoint) && ifVertical(wallTouched.start, wallTouched.end))
+			newPoint = nextPoints.firstPoint;
+		else
+			newPoint = getIntersectionPoint(prevPoints.firstPoint, nextPoints.firstPoint, wallTouched);
 		distance = getDistance(prevPoints.firstPoint, newPoint);
 		answer = newPoint;
 	}
 
 	if (doIntersect(prevPoints.secondPoint, nextPoints.secondPoint, wallTouched.start, wallTouched.end))
 	{
-		newPoint = getIntersectionPoint(prevPoints.secondPoint, nextPoints.secondPoint, wallTouched);
+		if (ifVertical(prevPoints.secondPoint, nextPoints.secondPoint) && ifVertical(wallTouched.start, wallTouched.end))
+			newPoint = nextPoints.secondPoint;
+		else
+			newPoint = getIntersectionPoint(prevPoints.secondPoint, nextPoints.secondPoint, wallTouched);
 		if (getDistance(prevPoints.secondPoint, newPoint) < distance)
 		{
 			distance = getDistance(prevPoints.secondPoint, newPoint);
-			answer.x = newPoint.x - (myRobot.width * cos(myRobot.direction));
-			answer.y = newPoint.y + (myRobot.width * sin(myRobot.direction));
+			answer.x = newPoint.x - (myRobot.width * cos(myRobot.rotation));
+			answer.y = newPoint.y - (myRobot.width * sin(myRobot.rotation));
 		}
 	}
 
 	if (doIntersect(prevPoints.thirdPoint, nextPoints.thirdPoint, wallTouched.start, wallTouched.end))
 	{
-		newPoint = getIntersectionPoint(prevPoints.thirdPoint, nextPoints.thirdPoint, wallTouched);
+		if (ifVertical(prevPoints.thirdPoint, nextPoints.thirdPoint) && ifVertical(wallTouched.start, wallTouched.end))
+			newPoint = nextPoints.thirdPoint;
+		else
+			newPoint = getIntersectionPoint(prevPoints.thirdPoint, nextPoints.thirdPoint, wallTouched);
 		if (getDistance(prevPoints.thirdPoint, newPoint) < distance)
 		{
 			distance = getDistance(prevPoints.thirdPoint, newPoint);
-			answer.x = newPoint.x + myRobot.height * (sin(myRobot.direction));
-			answer.y = newPoint.y + myRobot.height * (cos(myRobot.direction));
+			answer.x = newPoint.x + myRobot.height * (sin(myRobot.rotation));
+			answer.y = newPoint.y - myRobot.height * (cos(myRobot.rotation));
 		}
 	}
 
 	if (doIntersect(prevPoints.lastPoint, nextPoints.lastPoint, wallTouched.start, wallTouched.end))
 	{
-		newPoint = getIntersectionPoint(prevPoints.lastPoint, nextPoints.lastPoint, wallTouched);
+		if (ifVertical(prevPoints.lastPoint, nextPoints.lastPoint) && ifVertical(wallTouched.start, wallTouched.end))
+			newPoint = nextPoints.lastPoint;
+		else
+			newPoint = getIntersectionPoint(prevPoints.lastPoint, nextPoints.lastPoint, wallTouched);
 		if (getDistance(prevPoints.lastPoint, newPoint) < distance)
 		{
 			distance = getDistance(prevPoints.lastPoint, newPoint);
-			answer.x = newPoint.x - (myRobot.width * cos(myRobot.direction)) + myRobot.height * (sin(myRobot.direction));
-			answer.y = newPoint.y + (myRobot.width * sin(myRobot.direction)) - myRobot.height * (cos(myRobot.direction));
+			answer.x = newPoint.x + myRobot.height * (sin(myRobot.rotation)) - (myRobot.width * cos(myRobot.rotation));
+			answer.y = newPoint.y - myRobot.height * (cos(myRobot.rotation)) - (myRobot.width * sin(myRobot.rotation));
 		}
 	}
-
+	if (ifVertical(wallTouched.start, wallTouched.end))
+	{
+		if (prevPoint.x < nextPoint.x)
+			answer.x -= 1;
+		else if (prevPoint.x > nextPoint.x)
+			answer.x += 1;
+	}
+	else if (ifHorizontal(wallTouched.start, wallTouched.end))
+	{
+		if (prevPoint.y < nextPoint.y)
+			answer.y -= 1;
+		else if (prevPoint.y > nextPoint.y)
+			answer.y += 1;
+	}
+	else
+	{
+		if (prevPoint.x < nextPoint.x)
+			answer.x -= 1;
+		else if (prevPoint.x > nextPoint.x)
+			answer.x += 1;
+		if (prevPoint.y < nextPoint.y)
+			answer.y -= 1;
+		else if (prevPoint.y > nextPoint.y)
+			answer.y += 1;
+	}
 	myRobot.position = answer;
 	return;
+}
+
+static bool ifVertical(dpoint_t p1, dpoint_t p2)
+{
+	if (p1.x == p2.x)
+		return true;
+	return false;
+}
+
+static bool ifHorizontal(dpoint_t p1, dpoint_t p2)
+{
+	if (p1.y == p2.y)
+		return true;
+	return false;
 }
