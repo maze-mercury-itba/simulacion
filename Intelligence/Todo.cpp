@@ -2,19 +2,28 @@
 #include "../grafica/EventGenerator.h"
 #include "../senact/senact.h"
 #include "Intelligence.h"
+extern "C" {
+#include "../FileHandler/FileHandler.h"
+}
 
-static uint16_t amMoving;
+
+static uint16_t amRotating;
 static robot_t robot;
 static map_t map;
+
+static unsigned char random;
+
 
 #define PI		3.14159
 #define SPEED	10
 enum dirs { STILL, UP, DOWN, LEFT, RIGHT };
 
 // Sensores
-double S_getStateValue(sensor_id) { return 0; }
+
+int16_t S_Init(char * f) { return F_Startup(f);  };
+double S_getStateValue(sensor_id) { return random++/16 ; }
 void * S_getStateSens(sensor_id) { return NULL; }
-uint16_t S_getAmountSen(void) { return 0; }
+uint16_t S_getAmountSen(void) { return F_getBasicInfo(3); }
 
 // Actuadores
 uint16_t S_setActuatorMovUnproc(uint16_t actuator_id, int8_t actuator_percentage) { return 0; }
@@ -22,21 +31,21 @@ uint16_t S_getAmountAct(void) { return 0; }
 
 
 // Mantenimiento
-uint16_t S_Update(void) { W_configureRobot(robot.direction, robot.velocity,0); return 0; }
+uint16_t S_Update(void) { W_configureRobot(robot.direction, robot.velocity, 0); return 0; }
 
 // Configuracion
 uint16_t S_setSensorError(sensor_id, void*) { return 0; }
 uint16_t S_setActuatorError(sensor_id, void*) { return 0; }
 
 
-void I_Init(uint16_t mode) { robot.velocity = 0; amMoving = STILL; } //configuracion inicial
+void I_Init(uint16_t mode) { robot.velocity = 0; amRotating = STILL; } //configuracion inicial
 
 void I_Update(void)
 {
-	if (amMoving == STILL)
-		robot.velocity = 0;
-	else
-		robot.velocity = SPEED;
+	if (amRotating == LEFT)
+		robot.direction -= PI / 20;
+	else if (amRotating == RIGHT)
+		robot.direction += PI / 20;
 } // va a usar las funciones getInfo, processData, whatDoIDoNext, y doAction.
 
 int16_t I_setMode(uint16_t mode) { return 0; }
@@ -85,47 +94,42 @@ void I_Drive(void * event)
 
 	switch (ev) {
 	case UP_UP:
-		if (amMoving = UP) {
-			amMoving = STILL;
+		if (robot.velocity == SPEED) {
+			robot.velocity = 0;
 		}
 		break;
 
 	case DOWN_UP:
-		if (amMoving = DOWN) {
-			amMoving = STILL;
+		if (robot.velocity == -SPEED) {
+			robot.velocity = 0;
 		}
 		break;
 
 	case LEFT_UP:
-		if (amMoving = LEFT) {
-			amMoving = STILL;
+		if (amRotating == LEFT) {
+			amRotating = STILL;
 		}
 		break;
 
 	case RIGHT_UP:
-		if (amMoving = RIGHT) {
-			amMoving = STILL;
-		}
+		if (amRotating == RIGHT)
+			amRotating = STILL;
 		break;
 
 	case UP_DOWN:
-		amMoving = UP;
-		robot.direction = 0;
+		robot.velocity = SPEED;
 		break;
 
 	case DOWN_DOWN:
-		amMoving = DOWN;
-		robot.direction = PI;
+		robot.velocity = -SPEED;
 		break;
 
 	case LEFT_DOWN:
-		amMoving = LEFT;
-		robot.direction = 3 * PI / 2;
+		amRotating = LEFT;
 		break;
 
 	case RIGHT_DOWN:
-		amMoving = RIGHT;
-		robot.direction = PI / 2;
+		amRotating = RIGHT;
 		break;
 	}
 }

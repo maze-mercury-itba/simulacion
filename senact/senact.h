@@ -7,6 +7,8 @@
 
 typedef uint16_t sensor_id;
 
+int16_t S_Init(char * configPath);
+
 // Sensores
 double S_getStateValue (sensor_id);
 void * S_getStateSens (sensor_id);
@@ -26,7 +28,6 @@ uint16_t S_setActuatorError (sensor_id, void*);
 
 
 
-//los ids quedarian definidos segun el numero que tenian cuando se llamo a set config
 
 
 

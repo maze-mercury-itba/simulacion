@@ -12,13 +12,14 @@
 class Graphic
 {
 public:
-	Graphic(const char * robotPath, uidpoint_t robotSize, map_t map, const char * backgroundPath = NULL);
+	Graphic(const char * robotPath, uipoint_t robotSize, map_t map, const char * backgroundPath = NULL);
 	~Graphic();
 
 	ALLEGRO_DISPLAY * getDisplay();
 
 	void drawBackground();
 	void drawRobot(position_t pos);
+	void drawSensorInfo(sensor_t s, double distance);
 	void showChanges();
 
 //	mostrar cosas de los sensores!
@@ -35,5 +36,6 @@ private:
 	ALLEGRO_BITMAP * background;
 	map_t map;
 
-	fdpoint_t robotScaleFactor;
+	fpoint_t robotScaleFactor;
+	position_t lastRobotPos; //para saber donde dibujar si me llega data de los sensores
 };

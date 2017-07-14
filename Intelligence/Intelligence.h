@@ -2,14 +2,20 @@
 #define INTELIGENCIA_H
 #include <stdbool.h> 
 #include <stdint.h>
+#include "../senact/senact.h"
 
 //FEDE
 //extern uint16_t sen_state_sens(uint16_t _sensorId);
 //extern void act_mov(nextStep_s);
+
+typedef enum{TURN_R,TURN_L,GO_FWRD,GO_BCK} direction_t;
+
+typedef enum{AUTO1, AUTO2, ASSISTED1, ASSISTED2, MANUAL} intMode_t;
+
 typedef struct {
 	int16_t action;
 	int16_t velocity;//milisegundos
-}NextStep_s;
+}nextStep_t;
 
 void I_Init(uint16_t mode); //configuracion inicial
 

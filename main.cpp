@@ -6,7 +6,12 @@
 #include "Intelligence/Intelligence.h"
 //}
 #include <allegro5\allegro.h>
+#include "FileHandler/mapFile.h"
+extern "C" {
+#include "FileHandler/FileHandler.h"
+}
 
+enum robotData {WIDTH, HEIGHT, SHAPE, N_SENS};
 
 #define N_WALLS 4
 
@@ -14,16 +19,34 @@ int main(void)
 {
 	if (!al_init())
 		return EXIT_FAILURE;
+	map_t map;
+	if (readMap("mapa", map) == false)
+		return EXIT_FAILURE;
 
-	uint16_t worldState = NOTHING_HAPPENED;
-	robot_t r = { 40, 400, 40, 0, 0 }; r.position = { 50,50 };
-	uidpoint_t rSize = {uint16_t(r.width), uint16_t(r.height)};
-	const char robotPath[]=  "grafica/robot.png" ;
+	if (S_Init("robot.txt") != F_OK)
+		return EXIT_FAILURE;
 
-	dvector_t wall[N_WALLS] = { { {100, 100},  {100, 500} }, { {100, 500}, {700, 500} },
-	{ {700, 500}, {700, 100} }, { {700, 100}, {100, 100} } };
 
-	map_t map = { N_WALLS, &wall[0], {200, 0} };
+	robot_t r;
+	r.velocity = 0;
+	r.width = 50;
+	r.height = 50;
+	r.position.x = 250;
+	r.position.y = 250;
+
+	r.width = F_getBasicInfo(WIDTH);
+	r.height = F_getBasicInfo(HEIGHT);
+	uint16_t nSens = S_getAmountSen();
+
+	for (unsigned int i = 0; i < nSens; i++) {
+		r.sensorArray[i].positionOnRobot.x = F_getSensorXPos(i);
+		r.sensorArray[i].positionOnRobot.y = F_getSensorYPos(i);
+		r.sensorArray[i].angle = F_getSensorAngle(i);
+	}
+	
+
+	uipoint_t rSize = {uint16_t(r.width), uint16_t(r.height)};
+	const char robotPath[] = "grafica/robot.png";
 
 	Graphic g(&robotPath[0], rSize, map);
 	g.drawBackground();
@@ -36,7 +59,7 @@ int main(void)
 	S_setSensorError(0, NULL);
 	EventGenerator e(g.getDisplay());
 	uint16_t ev = NO_EVENT;
-
+	uint16_t worldState = NOTHING_HAPPENED;
 
 	//Orden de updates: mundo, sensores y actuadores, inteligencia. Es importante.
 	do {
@@ -67,7 +90,9 @@ int main(void)
 		case FRAME_TIMEOUT:
 			g.drawBackground();
 			g.drawRobot(W_getRobotPosition());
-			S_getAmountSen(); // aca mostras lo que te devuelve sen&act de alguna manera
+
+			for (unsigned int i = 0; i<nSens; i++)
+				g.drawSensorInfo(r.sensorArray[i], S_getStateValue(i)); // aca mostras lo que te devuelve sen&act de alguna manera
 			S_getAmountAct(); 
 			g.showChanges();
 			break;

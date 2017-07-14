@@ -2,8 +2,9 @@
 #include <cstdio>
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_native_dialog.h>
+#include <cmath>
 
-Graphic::Graphic(const char * robotPath, uidpoint_t robotSize, map_t map, const char * backgroundPath)
+Graphic::Graphic(const char * robotPath, uipoint_t robotSize, map_t map, const char * backgroundPath)
 {
 	display = NULL;
 	robot = NULL;
@@ -64,6 +65,7 @@ Graphic::~Graphic()
 			background = NULL;
 		}
 
+		al_uninstall_keyboard();
 		al_destroy_bitmap(robot);
 		robot = NULL;
 		al_destroy_display(display);
@@ -91,7 +93,46 @@ void Graphic::drawBackground()
 
 void Graphic::drawRobot(position_t pos)
 {
-	al_draw_scaled_rotated_bitmap(robot, 0, 0, pos.position.x, pos.position.y, robotScaleFactor.x, robotScaleFactor.y, 0, 0);
+	lastRobotPos = pos;
+	al_draw_scaled_rotated_bitmap(robot, al_get_bitmap_width(robot)/2, al_get_bitmap_height(robot)/2, 
+		pos.position.x, pos.position.y, robotScaleFactor.x, robotScaleFactor.y, pos.angle, 0);
+	//al_draw_scaled_rotated_bitmap(robot, 0, 0, pos.position.x, pos.position.y, robotScaleFactor.x, robotScaleFactor.y, 0, 0);
+
+}
+
+void Graphic::drawSensorInfo(sensor_t s, double distance) 
+{
+	//double sx = s.positionOnRobot.x - al_get_bitmap_width(robot) * robotScaleFactor.x/2;
+	//double sy = s.positionOnRobot.y - al_get_bitmap_width(robot) * robotScaleFactor.y/2; //para acortar los nombres nada mas
+
+	//double sensDist = sqrt(sx*sx + sy*sy);
+	//
+	//double sensAngle = 3.159/2; //caso sx == 0 (angle va a estar entre 0 y 90 porque el robot es cuadrado y se mide de la esq sup izq
+	//if (sy == 0 && sx < 0)
+	//	sensAngle += 3.159;
+	//else if (sy != 0) {
+	//	sensAngle = atan(sy / sx);
+	//	if (sensAngle > 0) {
+	//		sensAngle = 3*3.159/2 - sensAngle; //primer cuadrante cartesiano
+	//		if (sx < 0)
+	//			sensAngle -= 3.159; //tercer cuadrante cartesiano
+	//	}		
+	//	else {
+	//		sensAngle = 3.159 / 2 - sensAngle; //segundo cuadrante cartesiano
+	//		if (sx > 0) //cuarto cuadrante
+	//			sensAngle += 3.159;
+	//	}
+	//	//ahora tengo con el sistema de coordenadas "normal" (respecto de x, antiohorario)
+	//	//lo paso a respecto de y, horario
+	//	sensAngle = 3.159 / 2 + 2 * 3.159 - sensAngle;
+	//}
+	////en sensAngle tengo que tan corrido esta por default del eje x. ahora tengo que ver como se realciona con la pos actual
+	//sensAngle += lastRobotPos.angle;
+
+	//float x = lastRobotPos.position.x + sensDist*sin(sensAngle);
+	//float y = lastRobotPos.position.y + sensDist*cos(sensAngle);
+
+	//al_draw_line(x, y, x + distance*sin(sensAngle+s.angle), y + distance*cos(sensAngle+s.angle), al_map_rgb(0, 0, 255), 1);
 }
 
 void Graphic::showChanges()

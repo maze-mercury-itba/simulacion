@@ -1,7 +1,7 @@
 #ifndef FILEHANDLER_H
 #define FILEHANDLER_H
 
-#define F_MAX_AMOUNT_OF_DATA 10
+#define F_MAX_AMOUNT_OF_DATA 100
 #define F_OK 1
 
 //errors

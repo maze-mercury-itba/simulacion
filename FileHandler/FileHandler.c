@@ -19,7 +19,7 @@ int16_t F_Startup (char * filename)
 	fp = fopen(filename,"r");
 	if(fp)
 	{
-		while(fscanf(fp,"%lf",info[counter++]) != 0)
+		while(fscanf(fp,"%lf",&info[counter++]) != EOF && counter < F_MAX_AMOUNT_OF_DATA)
 		{
 		}
 
@@ -44,22 +44,22 @@ uint16_t F_getBasicInfo (uint16_t order)
 
 double F_getSensorType (uint16_t sensornumber)
 {
-	return F_getInfo((sensornumber*4)+10);
+	return F_getInfo((sensornumber*4)+9);
 }
 
 double F_getSensorXPos (uint16_t sensornumber)
 {
-	return F_getInfo((sensornumber*4)+11);
+	return F_getInfo((sensornumber*4)+10);
 }
 
 double F_getSensorYPos (uint16_t sensornumber)
 {
-	return F_getInfo((sensornumber*4)+12);
+	return F_getInfo((sensornumber*4)+11);
 }
 
 double F_getSensorAngle (uint16_t sensornumber)
 {
-	return F_getInfo((sensornumber*4)+13);
+	return F_getInfo((sensornumber*4)+12);
 }
 
 
