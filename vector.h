@@ -15,15 +15,15 @@ typedef struct { double x, y; } dpoint_t;
 typedef struct { dpoint_t start, end; } dvector_t;
 
 //con float
-typedef struct { float x, y;} fdpoint_t;
-typedef struct { fdpoint_t start, end; } fvector_t;
+typedef struct { float x, y;} fpoint_t;
+typedef struct { fpoint_t start, end; } fvector_t;
 
 //con unsigned int de 16 bits
-typedef struct { uint16_t x, y;} uidpoint_t;
-typedef struct { uidpoint_t start, end; } uivector_t;
+typedef struct { uint16_t x, y;} uipoint_t;
+typedef struct { uipoint_t start, end; } uivector_t;
 
 //con signed int de 16 bits
-typedef struct { int16_t x, y;} idpoint_t;
-typedef struct { idpoint_t start, end; } ivector_t;
+typedef struct { int16_t x, y;} ipoint_t;
+typedef struct { ipoint_t start, end; } ivector_t;
 
 #endif //VECTOR_H
