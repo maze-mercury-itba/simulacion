@@ -48,7 +48,7 @@ bool readMap(const char * path, map_t& map)
 	}
 
 	if (valid == true && q.size() > 0) {
-		map.nWalls = q.size();
+		map.nWalls = (uint16_t)q.size();
 		map.walls = new dvector_t [map.nWalls];
 
 		for (unsigned int i = 0; i < map.nWalls; i++) {

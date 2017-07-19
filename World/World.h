@@ -13,7 +13,8 @@ typedef struct {
 
 typedef struct 
 {
-	double width, depth, height;	//agregar toda la info necesaria de la forma
+	uint16_t amountOfPoints;
+	dpoint_t * robotPoints;
 	double direction;				//Direccion hacia la que apunta la parte frontal del Robot.(es un angulo en radianes donde el 0° es el eje y)
 	double rotation;
 	double velocity;				//[velocity]= cm/ticks (son las unidades de la veocidad).
@@ -45,7 +46,8 @@ robotState_t W_Update(void);				//Avanzar la simulacion. devuelve codigo de erro
 void W_setRobotConfiguration(robot_t * _myRobot);
 
 sensData_t W_getSensorData(uint16_t sensorID);	//despues el sensor se fija que significa esto para este sensor
-bool W_configureRobot(double _direction, double _velocity, double _rotation);
+bool W_configureRobot(double _direction, double _velocity,double _rotation);
+void W_rotateRobot(double angle, dpoint_t pointInRobot);
 
 position_t W_getRobotPosition(void);
 dpoint_t absolutePoint(dpoint_t point);

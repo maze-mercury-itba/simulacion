@@ -88,7 +88,12 @@ uint16_t EventGenerator::getNextEvent()
 			case ALLEGRO_KEY_RIGHT:
 				evCode = (ev.type == ALLEGRO_EVENT_KEY_UP ? RIGHT_UP :RIGHT_DOWN);
 				break;
-
+			case ALLEGRO_KEY_A:
+				evCode = (ev.type == ALLEGRO_EVENT_KEY_UP ? A_UP : A_DOWN);
+				break;
+			case ALLEGRO_KEY_D:
+				evCode = (ev.type == ALLEGRO_EVENT_KEY_UP ? D_UP : D_DOWN);
+				break;
 				// ESTOS HANDLERS DE EVENTOS NO VAN A QUEDAR ACA!!
 			case ALLEGRO_KEY_F:
 				if (ev.type == ALLEGRO_EVENT_KEY_UP && al_get_timer_speed(simulationTimer) > MIN_SIMULATION_TIMER)

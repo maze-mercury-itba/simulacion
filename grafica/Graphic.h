@@ -18,7 +18,7 @@ public:
 	ALLEGRO_DISPLAY * getDisplay();
 
 	void drawBackground();
-	void drawRobot(position_t pos);
+	void drawRobot(dpoint_t pos, double angle);
 	void drawSensorInfo(sensor_t s, double distance);
 	void showChanges();
 
@@ -37,5 +37,6 @@ private:
 	map_t map;
 
 	fpoint_t robotScaleFactor;
-	position_t lastRobotPos; //para saber donde dibujar si me llega data de los sensores
+	dpoint_t lastRobotPos; //para saber donde dibujar si me llega data de los sensores
+	double lastRobotAngle;
 };

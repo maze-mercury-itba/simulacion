@@ -91,11 +91,12 @@ void Graphic::drawBackground()
 	al_draw_filled_circle(map.target.x, map.target.y, 5, al_map_rgb(255, 0, 0));	//dibujar el target
 }
 
-void Graphic::drawRobot(position_t pos)
+void Graphic::drawRobot(dpoint_t pos, double angle)
 {
 	lastRobotPos = pos;
+	lastRobotAngle = angle;
 	al_draw_scaled_rotated_bitmap(robot, al_get_bitmap_width(robot)/2, al_get_bitmap_height(robot)/2, 
-		pos.position.x, pos.position.y, robotScaleFactor.x, robotScaleFactor.y, pos.angle, 0);
+		pos.x, pos.y, robotScaleFactor.x, robotScaleFactor.y,angle, 0);
 	//al_draw_scaled_rotated_bitmap(robot, 0, 0, pos.position.x, pos.position.y, robotScaleFactor.x, robotScaleFactor.y, 0, 0);
 
 }

@@ -1,14 +1,15 @@
-#include "World/World.h"
-#include "grafica/EventGenerator.h"
-#include "grafica/Graphic.h"
+
+#include ".\World\World.h"
+#include ".\grafica\EventGenerator.h"
+#include ".\grafica\Graphic.h"
 //extern "C" {
-#include "senact/senact.h"
-#include "Intelligence/Intelligence.h"
+#include ".\senact\senact.h"
+#include ".\Intelligence\Intelligence.h"
 //}
 #include <allegro5\allegro.h>
-#include "FileHandler/mapFile.h"
+#include ".\FileHandler\mapFile.h"
 extern "C" {
-#include "FileHandler/FileHandler.h"
+#include ".\FileHandler\FileHandler.h"
 }
 
 enum robotData {WIDTH, HEIGHT, SHAPE, N_SENS};
@@ -23,19 +24,46 @@ int main(void)
 	if (readMap("mapa", map) == false)
 		return EXIT_FAILURE;
 
-	if (S_Init("robot.txt") != F_OK)
-		return EXIT_FAILURE;
+	//if (S_Init("robot.txt") != F_OK)
+		//return EXIT_FAILURE;
 
 
 	robot_t r;
 	r.velocity = 0;
-	r.width = 50;
-	r.height = 50;
-	r.position.x = 250;
-	r.position.y = 250;
+	//r.width = 50;
+	//r.height = 50;
+	r.robotPoints = new dpoint_t[12];
+	r.amountOfPoints = 12;
+	r.robotPoints[0].x = 0;
+	r.robotPoints[0].y = 0;
+	r.robotPoints[1].x = 50;
+	r.robotPoints[1].y = 0;
+	r.robotPoints[2].x = 0;
+	r.robotPoints[2].y = 50;
+	r.robotPoints[3].x = 50;
+	r.robotPoints[3].y = 50;
+	r.robotPoints[4].x = 0;
+	r.robotPoints[4].y = 15;
+	r.robotPoints[5].x = 0;
+	r.robotPoints[5].y = 30;
+	r.robotPoints[6].x = 15;
+	r.robotPoints[6].y = 0;
+	r.robotPoints[7].x = 30;
+	r.robotPoints[7].y = 0;
+	r.robotPoints[8].x = 50;
+	r.robotPoints[8].y = 15;
+	r.robotPoints[9].x = 50;
+	r.robotPoints[9].y = 30;
+	r.robotPoints[10].x = 15;
+	r.robotPoints[10].y = 50;
+	r.robotPoints[11].x = 30;
+	r.robotPoints[11].y = 50;
 
-	r.width = F_getBasicInfo(WIDTH);
-	r.height = F_getBasicInfo(HEIGHT);
+	r.position.x = 270;
+	r.position.y = 270;
+
+	//r.width = F_getBasicInfo(WIDTH);
+	//r.height = F_getBasicInfo(HEIGHT);
 	uint16_t nSens = S_getAmountSen();
 
 	for (unsigned int i = 0; i < nSens; i++) {
@@ -45,7 +73,7 @@ int main(void)
 	}
 	
 
-	uipoint_t rSize = {uint16_t(r.width), uint16_t(r.height)};
+	uipoint_t rSize = {50, 50};
 	const char robotPath[] = "grafica/robot.png";
 
 	Graphic g(&robotPath[0], rSize, map);
@@ -74,7 +102,10 @@ int main(void)
 			switch (worldState) {
 			case CRASHED:
 				g.drawBackground();
-				g.drawRobot(W_getRobotPosition());
+				dpoint_t centerPoint;
+				centerPoint.x = 25;
+				centerPoint.y = 25;
+				g.drawRobot(absolutePoint(centerPoint), W_getRobotPosition().angle);
 				g.showChanges();
 				//ev = EXIT;
 				//g.showLoseMsg();
@@ -89,7 +120,10 @@ int main(void)
 
 		case FRAME_TIMEOUT:
 			g.drawBackground();
-			g.drawRobot(W_getRobotPosition());
+			dpoint_t centerPoint;
+			centerPoint.x = 25;
+			centerPoint.y = 25;
+			g.drawRobot(absolutePoint(centerPoint), W_getRobotPosition().angle);
 
 			for (unsigned int i = 0; i<nSens; i++)
 				g.drawSensorInfo(r.sensorArray[i], S_getStateValue(i)); // aca mostras lo que te devuelve sen&act de alguna manera
@@ -99,7 +133,7 @@ int main(void)
 
 
 		default:
-			if (ev!=NO_EVENT)
+			if (ev != NO_EVENT)
 				I_Drive(&ev); //si el evento no es para mi, es para la inteligencia
 			break;
 		}

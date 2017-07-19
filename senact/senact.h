@@ -7,7 +7,7 @@
 
 typedef uint16_t sensor_id;
 
-int16_t S_Init(char * configPath);
+//int16_t S_Init(char * configPath);
 
 // Sensores
 double S_getStateValue (sensor_id);

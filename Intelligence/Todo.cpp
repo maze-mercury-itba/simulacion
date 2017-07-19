@@ -1,29 +1,20 @@
-#include "../World/World.h"
-#include "../grafica/EventGenerator.h"
-#include "../senact/senact.h"
+#include "..\World\World.h"
+#include "..\grafica\EventGenerator.h"
+#include "..\senact\senact.h"
 #include "Intelligence.h"
-extern "C" {
-#include "../FileHandler/FileHandler.h"
-}
 
-
-static uint16_t amRotating;
+static uint16_t amMoving;
 static robot_t robot;
 static map_t map;
-
-static unsigned char random;
-
 
 #define PI		3.14159
 #define SPEED	10
 enum dirs { STILL, UP, DOWN, LEFT, RIGHT };
 
 // Sensores
-
-int16_t S_Init(char * f) { return F_Startup(f);  };
-double S_getStateValue(sensor_id) { return random++/16 ; }
+double S_getStateValue(sensor_id) { return 0; }
 void * S_getStateSens(sensor_id) { return NULL; }
-uint16_t S_getAmountSen(void) { return F_getBasicInfo(3); }
+uint16_t S_getAmountSen(void) { return 0; }
 
 // Actuadores
 uint16_t S_setActuatorMovUnproc(uint16_t actuator_id, int8_t actuator_percentage) { return 0; }
@@ -31,21 +22,20 @@ uint16_t S_getAmountAct(void) { return 0; }
 
 
 // Mantenimiento
-uint16_t S_Update(void) { W_configureRobot(robot.direction, robot.velocity, 0); return 0; }
+uint16_t S_Update(void) { W_configureRobot(robot.direction, robot.velocity, robot.rotation); return 0; }
 
 // Configuracion
 uint16_t S_setSensorError(sensor_id, void*) { return 0; }
 uint16_t S_setActuatorError(sensor_id, void*) { return 0; }
 
-
-void I_Init(uint16_t mode) { robot.velocity = 0; amRotating = STILL; } //configuracion inicial
+void I_Init(uint16_t mode) { robot.velocity = 0; amMoving = STILL; } //configuracion inicial
 
 void I_Update(void)
 {
-	if (amRotating == LEFT)
-		robot.direction -= PI / 20;
-	else if (amRotating == RIGHT)
-		robot.direction += PI / 20;
+	if (amMoving == STILL)
+		robot.velocity = 0;
+	else
+		robot.velocity = SPEED;
 } // va a usar las funciones getInfo, processData, whatDoIDoNext, y doAction.
 
 int16_t I_setMode(uint16_t mode) { return 0; }
@@ -91,45 +81,59 @@ int16_t I_setMode(uint16_t mode) { return 0; }
 void I_Drive(void * event)
 {
 	uint16_t ev = *((uint16_t *)event);
+	dpoint_t centerPoint;
+	centerPoint.x = 25;
+	centerPoint.y = 25;
 
 	switch (ev) {
 	case UP_UP:
-		if (robot.velocity == SPEED) {
-			robot.velocity = 0;
+		if (amMoving = UP) {
+			amMoving = STILL;
 		}
 		break;
 
 	case DOWN_UP:
-		if (robot.velocity == -SPEED) {
-			robot.velocity = 0;
+		if (amMoving = DOWN) {
+			amMoving = STILL;
 		}
 		break;
 
 	case LEFT_UP:
-		if (amRotating == LEFT) {
-			amRotating = STILL;
+		if (amMoving = LEFT) {
+			amMoving = STILL;
 		}
 		break;
 
 	case RIGHT_UP:
-		if (amRotating == RIGHT)
-			amRotating = STILL;
+		if (amMoving = RIGHT) {
+			amMoving = STILL;
+		}
 		break;
 
 	case UP_DOWN:
-		robot.velocity = SPEED;
+		amMoving = UP;
+		robot.direction = 0;
 		break;
 
 	case DOWN_DOWN:
-		robot.velocity = -SPEED;
+		amMoving = DOWN;
+		robot.direction = PI;
 		break;
 
 	case LEFT_DOWN:
-		amRotating = LEFT;
+		amMoving = LEFT;
+		robot.direction = 3 * PI / 2;
 		break;
 
 	case RIGHT_DOWN:
-		amRotating = RIGHT;
+		amMoving = RIGHT;
+		robot.direction = PI / 2;
+		break;
+	case A_DOWN:
+		robot.rotation = robot.rotation + PI / 10;
+		break;
+	case D_DOWN:
+		robot.rotation = robot.rotation - PI / 10;
 		break;
 	}
 }
