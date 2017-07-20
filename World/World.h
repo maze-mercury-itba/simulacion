@@ -47,7 +47,7 @@ void W_setRobotConfiguration(robot_t * _myRobot);
 
 sensData_t W_getSensorData(uint16_t sensorID);	//despues el sensor se fija que significa esto para este sensor
 bool W_configureRobot(double _direction, double _velocity,double _rotation);
-void W_rotateRobot(double angle, dpoint_t pointInRobot);
+//void W_rotateRobot(double angle, dpoint_t pointInRobot);
 
 position_t W_getRobotPosition(void);
 dpoint_t absolutePoint(dpoint_t point);

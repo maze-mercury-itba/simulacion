@@ -3,36 +3,29 @@
 #define W_PI       3.14159265358979323846
 #define MAX_HIPO	1000
 #define W_ERROR	-1
+#define DEFASAJE	1
 
 typedef unsigned int uint;
-
-typedef struct
-{
-	dpoint_t firstPoint, secondPoint, thirdPoint, lastPoint;
-}PointsStructure_t;
-
 static map_t myMap;
 static robot_t myRobot;
 
 static dpoint_t getNextHipoteticRobotPosition(void);//BIEN
-static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint);
+static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint);//BIEN
 static bool	onSegment(dpoint_t p, dpoint_t q, dpoint_t r); //BIEN
 static int orientation(dpoint_t p, dpoint_t q, dpoint_t r); //BIEN
 static bool doIntersect(dpoint_t p1, dpoint_t q1, dpoint_t p2, dpoint_t q2);//BIEN
 static double max(double x, double y);//BIEN
 static double min(double x, double y);//BIEN
 static double calculatePendient(dpoint_t firstPoint, dpoint_t secondPoint);//BIEN
-static dpoint_t getIntersectionPoint(dpoint_t start, dpoint_t end, dvector_t wall);
+static dpoint_t getIntersectionPoint(dpoint_t start, dpoint_t end, dvector_t wall);//BIEN
 static double getMinDistance(double _angle, uint16_t sensorID);
 static dpoint_t getPoint(dpoint_t _point, double angle, double hipotenusa);
-static double getDistance(dpoint_t A, dpoint_t B);
+static double getDistance(dpoint_t A, dpoint_t B);//BIEN
 static double getAngle(uint16_t sensorID);
 static dpoint_t getSensorPointOnMap(double _angle, uint16_t sensorID);
-static void moveRobotToTouchedWall(dvector_t wallTouched, dpoint_t prevPoint, dpoint_t nextPoint);
-static bool ifVertical(dpoint_t p1, dpoint_t p2);
-static bool ifHorizontal(dpoint_t p1, dpoint_t p2);
-static dpoint_t calculateNextPoint(dpoint_t point, dpoint_t nextPoint);
-static dpoint_t calculateRobotPositionFromPoint(dpoint_t relativePoint, dpoint_t robotNextPosition);
+static bool ifVertical(dpoint_t p1, dpoint_t p2);//BIEN
+static bool ifHorizontal(dpoint_t p1, dpoint_t p2);//BIEN
+static dpoint_t calculateNextPoint(dpoint_t point, dpoint_t nextPoint);//BIEN
 
 
 int16_t W_Init(map_t * mapInfo)
@@ -93,7 +86,6 @@ robotState_t W_Update(void)
 	else
 	{
 		dvector_t wallTouched = myMap.walls[hasCrashedWithWall(myRobot.position, nextPosition) - 1];
-		moveRobotToTouchedWall(wallTouched, myRobot.position, nextPosition);
 		return CRASHED;
 	}
 }
@@ -158,8 +150,8 @@ static uint16_t hasCrashedWithWall(dpoint_t previousPoint, dpoint_t nextPoint)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //set de funciones obtenidas de http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/ 
-//Y ya probadas supuestamente.
-static bool onSegment(dpoint_t p, dpoint_t q, dpoint_t r)		//Funcion que checkea si el punto q se encuentra dentro del caudrado q forma segmento que forman p con r
+//Y ya probadas.
+static bool onSegment(dpoint_t p, dpoint_t q, dpoint_t r)//Funcion que checkea si el punto q se encuentra dentro del caudrado q forma segmento que forman p con r
 {
 	if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
 		q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y))
@@ -210,7 +202,6 @@ static bool doIntersect(dpoint_t p1, dpoint_t q1, dpoint_t p2, dpoint_t q2)	//Fu
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 /*Funcion que recibe 2 doubles y devuelve el maximo entre los 2*/
 static double max(double x, double y)
 {
@@ -320,62 +311,6 @@ static dpoint_t getSensorPointOnMap(double _angle, uint16_t sensorID)
 	return answer;
 }
 
-/*Funcion encargada de mover el robot hacia el punto maximo que se puede mover antes de colisionar con la pared
-Recibe: la pared con la que colisiona, el punto del robot antes de moverse, y el proximo punto hipotetico
-No devuelve nada, cambia la posision de robot.
-*/
-static void moveRobotToTouchedWall(dvector_t wallTouched, dpoint_t prevPoint, dpoint_t nextPoint)
-{
-	dpoint_t newPoint;
-	dpoint_t answer;
-	double distance = MAX_HIPO;
-	
-	for (uint i = 0; i < myRobot.amountOfPoints; i++)
-	{
-		dpoint_t tempPoint = calculateNextPoint(myRobot.robotPoints[i], nextPoint);
-		dpoint_t prevPoint = absolutePoint(myRobot.robotPoints[i]);
-		if (doIntersect(prevPoint, tempPoint, wallTouched.start, wallTouched.end))
-		{
-			if (ifVertical(prevPoint, tempPoint) && ifVertical(wallTouched.start, wallTouched.end))
-				newPoint = tempPoint;
-			else
-				newPoint = getIntersectionPoint(prevPoint, tempPoint, wallTouched);
-			if (getDistance(prevPoint, newPoint) < distance)
-			{
-				distance = getDistance(prevPoint, newPoint);
-				answer = calculateRobotPositionFromPoint(myRobot.robotPoints[i], newPoint);
-			}
-		}
-	}
-	if (ifVertical(wallTouched.start, wallTouched.end))
-	{
-		if (prevPoint.x < nextPoint.x)
-			answer.x -= 1;
-		else if (prevPoint.x > nextPoint.x)
-			answer.x += 1;
-	}
-	else if (ifHorizontal(wallTouched.start, wallTouched.end))
-	{
-		if (prevPoint.y < nextPoint.y)
-			answer.y -= 1;
-		else if (prevPoint.y > nextPoint.y)
-			answer.y += 1;
-	}
-	else
-	{
-		if (prevPoint.x < nextPoint.x)
-			answer.x -= 1;
-		else if (prevPoint.x > nextPoint.x)
-			answer.x += 1;
-		if (prevPoint.y < nextPoint.y)
-			answer.y -= 1;
-		else if (prevPoint.y > nextPoint.y)
-			answer.y += 1;
-	}
-	myRobot.position = answer;
-	return;
-}
-
 static bool ifVertical(dpoint_t p1, dpoint_t p2)
 {
 	if (p1.x == p2.x)
@@ -406,24 +341,57 @@ static dpoint_t calculateNextPoint(dpoint_t point ,dpoint_t nextPoint)
 	return answer;
 }
 
-static dpoint_t calculateRobotPositionFromPoint(dpoint_t relativePoint , dpoint_t robotNextPosition)
-{
-	dpoint_t answer;
-	answer.x = robotNextPosition.x + relativePoint.y * (sin(myRobot.rotation)) - (relativePoint.x * cos(myRobot.rotation));
-	answer.y = robotNextPosition.y - relativePoint.y * (cos(myRobot.rotation)) - (relativePoint.x * sin(myRobot.rotation));
-	return answer;
-}
-
 /*void W_rotateRobot(double angle, dpoint_t pointInRobot)
 {
+	dpoint_t realPoint = absolutePoint(pointInRobot);
+	double deltaA, deltaB;
+	deltaA = myRobot.position.y - pointInRobot.y;
+	deltaB = myRobot.position.x - pointInRobot.x;
+	double c = sqrt(pow(deltaA, 2) + pow(deltaB, 2));
+	double tita;
+	double t = atan((deltaA) / (deltaB));
+	if (deltaA > 0 && deltaB > 0)
+		tita = (W_PI / 2) - t; //agrego pi sobre 2 - lo que estaba
+	else if (deltaA < 0 && deltaB > 0)
+		tita = (W_PI / 2) + t;
+	else if (deltaA < 0 && deltaB < 0)
+		tita = (3 / 2)*W_PI - t;
+	else if (deltaA > 0 && deltaB < 0)
+		tita = (3 / 2)*W_PI + t;
+	double beta = tita + angle;
+	myRobot.position.y = c*sin(beta) + pointInRobot.y;
+	myRobot.position.x = c*cos(beta) + pointInRobot.x;
+
 	for (uint i = 0; i < myRobot.amountOfPoints; i++)
 	{
-		double c = sqrt(pow(myRobot.robotPoints[i].y - pointInRobot.y, 2) + pow(myRobot.robotPoints[i].x - pointInRobot.x, 2));
-		double alfa = atan((myRobot.robotPoints[i].y - pointInRobot.y) / (myRobot.robotPoints[i].x - pointInRobot.x));
-		double beta = W_PI - alfa - angle;
-		double gamma = W_PI - beta;
-		dpoint_t realPoint = absolutePoint(pointInRobot);
-		myRobot.robotPoints[i].x = realPoint.x + cos(gamma)*c;
+		double deltaY, deltaX;
+		deltaY = myRobot.robotPoints[i].y - pointInRobot.y;
+		deltaX = myRobot.robotPoints[i].x - pointInRobot.x;
+		double c = sqrt(pow(deltaY, 2) + pow(deltaX, 2));
+		double tita;
+		double t = atan((deltaY) / (deltaX));
+		if (deltaY > 0 && deltaX > 0)
+			tita = (W_PI / 2) - t; //agrego pi sobre 2 - lo que estaba
+		else if (deltaY < 0 && deltaX > 0)
+			tita = (W_PI / 2) + t;
+		else if (deltaY < 0 && deltaX < 0)
+			tita = (3 / 2)*W_PI - t;
+		else if (deltaY > 0 && deltaX < 0)
+			tita = (3/2)*W_PI + t;
+		double beta = tita + angle;
+		myRobot.robotPoints[i].y = c*sin(beta) + pointInRobot.y;
+		myRobot.robotPoints[i].x = c*cos(beta) + pointInRobot.x;
+		//double gamma;
+		/*if (deltaY >= 0 && deltaX >= 0)
+			gamma = -(tita + angle);
+		else if (deltaY > 0 && deltaX < 0)
+			gamma = W_PI - tita - angle;
+		else if (deltaY < 0 && deltaX > 0)
+			gamma = - tita - angle;
+		else if(deltaY < 0 && deltaX < 0)
+			gamma = W_PI - (tita + angle);*/
+
+		/*myRobot.robotPoints[i].x = realPoint.x + cos(gamma)*c;
 		myRobot.robotPoints[i].y = realPoint.y + sin(gamma)*c;
 	}
 	myRobot.rotation = myRobot.rotation + angle;
