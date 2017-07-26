@@ -8,7 +8,7 @@ static robot_t robot;
 static map_t map;
 
 #define PI		3.14159
-#define SPEED	10
+#define SPEED	1
 enum dirs { STILL, UP, DOWN, LEFT, RIGHT };
 
 // Sensores
@@ -22,20 +22,27 @@ uint16_t S_getAmountAct(void) { return 0; }
 
 
 // Mantenimiento
-uint16_t S_Update(void) { W_configureRobot(robot.direction, robot.velocity, robot.rotation); return 0; }
+uint16_t S_Update(void) {
+	robot.D_angle = W_getRobotPosition().angle;
+	robot.position = W_getRobotPosition().position; 
+	W_configureRobot(robot.D_angle, robot.D_velocity, robot.R_point, robot.R_velocity);
+	return 0;
+}
 
 // Configuracion
 uint16_t S_setSensorError(sensor_id, void*) { return 0; }
 uint16_t S_setActuatorError(sensor_id, void*) { return 0; }
 
-void I_Init(uint16_t mode) { robot.velocity = 0; amMoving = STILL; } //configuracion inicial
+void I_Init(uint16_t mode) { robot.D_velocity = 0; amMoving = STILL; robot.R_point.x = 25; robot.R_point.y = 25; } //configuracion inicial
 
 void I_Update(void)
 {
 	if (amMoving == STILL)
-		robot.velocity = 0;
-	else
-		robot.velocity = SPEED;
+		robot.D_velocity = 0;
+	//else
+		//robot.D_velocity = SPEED;
+	//robot.D_angle = W_getRobotPosition().angle;
+	//robot.position = W_getRobotPosition().position;
 } // va a usar las funciones getInfo, processData, whatDoIDoNext, y doAction.
 
 int16_t I_setMode(uint16_t mode) { return 0; }
@@ -78,7 +85,7 @@ int16_t I_setMode(uint16_t mode) { return 0; }
 //}
 
 
-void I_Drive(void * event)
+void I_Drive(void * event)					//CAMBIOS: rotation por R_velocity. direction por D_angle
 {
 	uint16_t ev = *((uint16_t *)event);
 	dpoint_t centerPoint;
@@ -89,51 +96,49 @@ void I_Drive(void * event)
 	case UP_UP:
 		if (amMoving = UP) {
 			amMoving = STILL;
+			robot.D_velocity = 0;
 		}
 		break;
 
 	case DOWN_UP:
 		if (amMoving = DOWN) {
 			amMoving = STILL;
+			robot.D_velocity = 0;
 		}
 		break;
 
 	case LEFT_UP:
 		if (amMoving = LEFT) {
-			amMoving = STILL;
+			//amMoving = STILL;
+			robot.R_velocity = 0;
 		}
 		break;
 
 	case RIGHT_UP:
 		if (amMoving = RIGHT) {
-			amMoving = STILL;
+			//amMoving = STILL;
+			robot.R_velocity = 0;
 		}
 		break;
 
 	case UP_DOWN:
 		amMoving = UP;
-		robot.direction = 0;
+		robot.D_velocity = SPEED;
 		break;
 
 	case DOWN_DOWN:
 		amMoving = DOWN;
-		robot.direction = PI;
+		robot.D_velocity = -SPEED;
 		break;
 
 	case LEFT_DOWN:
 		amMoving = LEFT;
-		robot.direction = 3 * PI / 2;
+		robot.R_velocity = robot.R_velocity - PI / 100;
 		break;
 
 	case RIGHT_DOWN:
 		amMoving = RIGHT;
-		robot.direction = PI / 2;
-		break;
-	case A_DOWN:
-		robot.rotation = robot.rotation + PI / 10;
-		break;
-	case D_DOWN:
-		robot.rotation = robot.rotation - PI / 10;
+		robot.R_velocity = robot.R_velocity + PI / 100;
 		break;
 	}
 }

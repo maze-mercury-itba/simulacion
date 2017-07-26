@@ -14,5 +14,6 @@ bool ifVertical(dpoint_t p1, dpoint_t p2);//BIEN
 bool ifHorizontal(dpoint_t p1, dpoint_t p2);//BIEN
 dpoint_t getPoint(dpoint_t _point, double angle, double hipotenusa);//BIEN
 dpoint_t absolutePointWRobot(dpoint_t point, robot_t myRobot);//BIEN
+double absoluteValue(double value);//BIEN
 
 #endif // !CALCULUS_H

@@ -134,3 +134,9 @@ dpoint_t absolutePointWRobot(dpoint_t point, robot_t myRobot)
 	answer.y = myRobot.position.y + point.y * (cos(myRobot.D_angle)) + (point.x * sin(myRobot.D_angle));
 	return answer;
 }
+
+double absoluteValue(double value)
+{
+	value >= 0 ? value = value : value = -value;
+	return value;
+}

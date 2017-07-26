@@ -29,7 +29,7 @@ int main(void)
 
 
 	robot_t r;
-	r.velocity = 0;
+	r.D_velocity = 0;
 	//r.width = 50;
 	//r.height = 50;
 	r.robotPoints = new dpoint_t[12];
@@ -58,9 +58,13 @@ int main(void)
 	r.robotPoints[10].y = 50;
 	r.robotPoints[11].x = 30;
 	r.robotPoints[11].y = 50;
-
+	r.R_point.x = 25;
+	r.R_point.y = 25;
 	r.position.x = 270;
 	r.position.y = 270;
+	r.D_angle = 0;
+	r.D_velocity = 0;
+	r.R_velocity = 0;
 
 	//r.width = F_getBasicInfo(WIDTH);
 	//r.height = F_getBasicInfo(HEIGHT);
@@ -96,8 +100,9 @@ int main(void)
 		switch (ev) {
 		case SIMULATION_TIMEOUT:
 			worldState = W_Update();
-			S_Update();	//en estas dos funcs habria que verificar el error
 			I_Update();
+			S_Update();	//en estas dos funcs habria que verificar el error
+			
 			
 			switch (worldState) {
 			case CRASHED:
@@ -105,7 +110,7 @@ int main(void)
 				dpoint_t centerPoint;
 				centerPoint.x = 25;
 				centerPoint.y = 25;
-				g.drawRobot(absolutePoint(centerPoint), W_getRobotPosition().angle);
+				g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
 				g.showChanges();
 				//ev = EXIT;
 				//g.showLoseMsg();
@@ -123,7 +128,7 @@ int main(void)
 			dpoint_t centerPoint;
 			centerPoint.x = 25;
 			centerPoint.y = 25;
-			g.drawRobot(absolutePoint(centerPoint), W_getRobotPosition().angle);
+			g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
 
 			for (unsigned int i = 0; i<nSens; i++)
 				g.drawSensorInfo(r.sensorArray[i], S_getStateValue(i)); // aca mostras lo que te devuelve sen&act de alguna manera

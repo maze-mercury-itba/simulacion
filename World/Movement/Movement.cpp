@@ -79,13 +79,13 @@ robot_t W_rotateRobot(robot_t robot)
 	double c = sqrt(pow(deltaY, 2) + pow(deltaX, 2));
 	double tita;
 	if (deltaY >= 0 && deltaX > 0)
-		tita = -((W_PI / 2) - atan((deltaY) / (deltaX)));
+		tita = -((W_PI / 2) - absoluteValue(atan((deltaY) / (deltaX))));
 	else if (deltaY <= 0 && deltaX > 0)
-		tita = -((W_PI / 2) - atan((deltaY) / (deltaX))); //deberia ir un + en el arcotangente, pero como el arco tg me da un angulo negativo le pongo un -
+		tita = -((W_PI / 2) + absoluteValue(atan((deltaY) / (deltaX)))); //deberia ir un + en el arcotangente, pero como el arco tg me da un angulo negativo le pongo un -
 	else if (deltaY <= 0 && deltaX < 0)
-		tita = (1 / 2)*W_PI + atan((deltaY) / (deltaX));
+		tita = (W_PI / 2) + absoluteValue(atan((deltaY) / (deltaX)));
 	else if (deltaY >= 0 && deltaX < 0)
-		tita = (1 / 2)*W_PI + atan((deltaY) / (deltaX));  //lo mismo que en el segundo caso con los signos del atan
+		tita = (W_PI / 2) - absoluteValue(atan((deltaY) / (deltaX)));  //lo mismo que en el segundo caso con los signos del atan
 	else if (deltaX == 0)
 		tita = 0;
 
@@ -95,3 +95,4 @@ robot_t W_rotateRobot(robot_t robot)
 	robot.D_angle += robot.R_velocity;
 	return robot;
 }
+
