@@ -9,14 +9,17 @@ double getMinDistance(double _angle, uint16_t sensorID, map_t myMap, robot_t myR
 	dpoint_t firstPoint = getSensorPointOnMap(sensorID, myRobot);
 	dpoint_t secondPoint = getPoint(firstPoint, _angle, ALCANCE);
 	dvector_t nearestWall = myMap.walls[0];//inicializacion de nearestWall para que funcione el for
+	double distance = ALCANCE;
 	for (uint16_t i = 0; i < myMap.nWalls; i++)
 	{
 		dvector_t wall2Check = myMap.walls[i];
 		if (doIntersect(firstPoint, secondPoint, wall2Check.start, wall2Check.end))
 		{
-			if (getDistance(firstPoint, getIntersectionPoint(firstPoint, secondPoint, wall2Check))
-				<= getDistance(firstPoint, getIntersectionPoint(firstPoint, secondPoint, nearestWall)))
-				nearestWall = wall2Check;
+			if (getDistance(firstPoint, getIntersectionPoint(firstPoint, secondPoint, wall2Check))<= distance)
+			{
+			nearestWall = wall2Check;
+			distance = getDistance(firstPoint, getIntersectionPoint(firstPoint, secondPoint, wall2Check));
+			}
 		}
 	}
 	return getDistance(firstPoint, getIntersectionPoint(firstPoint, secondPoint, nearestWall));

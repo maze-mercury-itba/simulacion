@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include ".\World\World.h"
 #include ".\grafica\EventGenerator.h"
 #include ".\grafica\Graphic.h"
@@ -29,7 +30,7 @@ int main(void)
 
 
 	robot_t r;
-	r.D_velocity = 0;
+	//r.D_velocity = 0;
 	//r.width = 50;
 	//r.height = 50;
 	r.robotPoints = new dpoint_t[12];
@@ -65,6 +66,12 @@ int main(void)
 	r.D_angle = 0;
 	r.D_velocity = 0;
 	r.R_velocity = 0;
+	r.sensorArray[0].positionOnRobot.x = 25;
+	r.sensorArray[0].positionOnRobot.y = 0;
+	r.sensorArray[0].angle = 0;
+	r.sensorArray[1].positionOnRobot.x = 0;
+	r.sensorArray[1].positionOnRobot.y = 25;
+	r.sensorArray[1].angle = -3.14195/2.0;
 
 	//r.width = F_getBasicInfo(WIDTH);
 	//r.height = F_getBasicInfo(HEIGHT);
@@ -100,8 +107,9 @@ int main(void)
 		switch (ev) {
 		case SIMULATION_TIMEOUT:
 			worldState = W_Update();
-			I_Update();
 			S_Update();	//en estas dos funcs habria que verificar el error
+			I_Update();
+			
 			
 			
 			switch (worldState) {
@@ -115,7 +123,6 @@ int main(void)
 				//ev = EXIT;
 				//g.showLoseMsg();
 				break;
-
 			case ARRIVED_2_TARGET:
 				ev = EXIT;
 				g.showWinMsg();
@@ -130,9 +137,11 @@ int main(void)
 			centerPoint.y = 25;
 			g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
 
-			for (unsigned int i = 0; i<nSens; i++)
-				g.drawSensorInfo(r.sensorArray[i], S_getStateValue(i)); // aca mostras lo que te devuelve sen&act de alguna manera
-			S_getAmountAct(); 
+			//for (unsigned int i = 0; i<nSens; i++)
+			g.drawSensorInfo(r.sensorArray[0], S_getStateValue(0)); //aca mostras lo que te devuelve sen&act de alguna manera
+			g.drawSensorInfo(r.sensorArray[1], S_getStateValue(1));
+			std::cout << std::endl;
+			S_getAmountAct();
 			g.showChanges();
 			break;
 

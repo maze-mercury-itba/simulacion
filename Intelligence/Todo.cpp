@@ -12,7 +12,7 @@ static map_t map;
 enum dirs { STILL, UP, DOWN, LEFT, RIGHT };
 
 // Sensores
-double S_getStateValue(sensor_id) { return 0; }
+double S_getStateValue(sensor_id sensorID) { return W_getSensorData(sensorID).distance; }
 void * S_getStateSens(sensor_id) { return NULL; }
 uint16_t S_getAmountSen(void) { return 0; }
 

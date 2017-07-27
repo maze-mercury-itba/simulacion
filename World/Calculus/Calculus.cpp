@@ -123,7 +123,7 @@ dpoint_t getPoint(dpoint_t _point, double angle, double hipotenusa)
 {
 	dpoint_t newPoint;
 	newPoint.x =(_point.x + (cos((W_PI / 2) - angle)*hipotenusa)); //Hago W_PI/2 - angle porque lo paso a coordenadas normales x e y
-	newPoint.y =(_point.y + (sin((W_PI / 2) - angle)*hipotenusa));
+	newPoint.y =(_point.y - (sin((W_PI / 2) - angle)*hipotenusa));
 	return newPoint;
 }
 

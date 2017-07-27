@@ -12,10 +12,10 @@ enum events { NO_EVENT, UP_UP, UP_DOWN, LEFT_UP, LEFT_DOWN,
 #define FRAME_RATE					60	//en FPS
 
 
-#define	INITIAL_SIMULATION_TIMER	0.03		//cada cuanto hago update world inicialmente
+#define	INITIAL_SIMULATION_TIMER	0.01		//cada cuanto hago update world inicialmente
 //(va a ir cambiando con fastforward y eso), esta en segundos!
-#define	MIN_SIMULATION_TIMER		0.01	//lo mas rapido que puede ir la simulacion
-#define STEP_SIMULATION_TIMER		0.01	//de a cuanto se va cambiando la velocidad
+#define	MIN_SIMULATION_TIMER		0.001	//lo mas rapido que puede ir la simulacion
+#define STEP_SIMULATION_TIMER		0.001	//de a cuanto se va cambiando la velocidad
 #define MAX_SIMULATION_TIMER		1		//lo mas lento
 
 class EventGenerator

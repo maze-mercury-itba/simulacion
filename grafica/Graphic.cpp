@@ -3,6 +3,7 @@
 #include <allegro5\allegro_primitives.h>
 #include <allegro5\allegro_native_dialog.h>
 #include <cmath>
+#include <iostream>
 
 Graphic::Graphic(const char * robotPath, uipoint_t robotSize, map_t map, const char * backgroundPath)
 {
@@ -134,6 +135,7 @@ void Graphic::drawSensorInfo(sensor_t s, double distance)
 	//float y = lastRobotPos.position.y + sensDist*cos(sensAngle);
 
 	//al_draw_line(x, y, x + distance*sin(sensAngle+s.angle), y + distance*cos(sensAngle+s.angle), al_map_rgb(0, 0, 255), 1);
+	std::cout << "DS  " << distance <<" ";
 }
 
 void Graphic::showChanges()
