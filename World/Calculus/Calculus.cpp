@@ -2,6 +2,7 @@
 #include <cmath>
 #define W_PI		3.14159265358979323846
 #define MAX_HIPO	1000
+#define DOUBLE_EQUALITY	0.000005
 
 bool onSegment(dpoint_t p, dpoint_t q, dpoint_t r)//Funcion que checkea si el punto q se encuentra dentro del caudrado q forma segmento que forman p con r
 {
@@ -79,18 +80,18 @@ dpoint_t getIntersectionPoint(dpoint_t start, dpoint_t end, dvector_t wall)
 {
 	dpoint_t answer;
 	//Estos calculos fueron hechos previamente por IAN, solamente copie la formula final que me quedo
-	if (end.x != start.x && wall.end.x != wall.start.x)
+	if ( !aproximatelyEqual(end.x, start.x) && !aproximatelyEqual(wall.end.x,wall.start.x))
 	{
 		answer.x = ((start.y - calculatePendient(start, end)*start.x) - (wall.start.y - calculatePendient(wall.start, wall.end) * wall.start.x)) /
 			(calculatePendient(wall.start, wall.end) - calculatePendient(start, end));
 		answer.y = calculatePendient(start, end) * answer.x + (start.y - calculatePendient(start, end)*start.x);
 	}
-	if (end.x == start.x && wall.end.x != wall.start.x)
+	else if (aproximatelyEqual(end.x, start.x) && !aproximatelyEqual(wall.end.x, wall.start.x))
 	{
 		answer.x = start.x;
 		answer.y = (calculatePendient(wall.start, wall.end) * answer.x) + wall.start.y - (calculatePendient(wall.start, wall.end) * wall.start.x);
 	}
-	if (wall.end.x == wall.start.x && end.x != start.x)
+	else if (aproximatelyEqual(wall.end.x, wall.start.x) && !aproximatelyEqual(end.x, start.x))
 	{
 		answer.x = wall.start.x;
 		answer.y = (calculatePendient(start, end) * answer.x) + start.y - (calculatePendient(start, end) * start.x);
@@ -139,4 +140,11 @@ double absoluteValue(double value)
 {
 	value >= 0 ? value = value : value = -value;
 	return value;
+}
+
+bool aproximatelyEqual(double x, double y)
+{
+	if (x >= (y + DOUBLE_EQUALITY) || x <= (y - DOUBLE_EQUALITY))
+		return false;
+	return true;
 }

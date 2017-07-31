@@ -35,11 +35,11 @@ void W_setRobotConfiguration(robot_t * _myRobot) //VER QUE METERLE A ESTA FUNCIO
 	return;
 }
 
-bool W_configureRobot(double dAngle, double dVelocity, dpoint_t rPoint, double rVelocity) //FUNCION NUEVA!!!!!!!!!!!!!
+bool W_configureRobot(/*double dAngle,*/ double dVelocity, /*dpoint_t rPoint,*/ double rVelocity) //FUNCION NUEVA!!!!!!!!!!!!!
 {
-	myRobot.D_angle = dAngle;
+	//myRobot.D_angle = dAngle;
 	myRobot.D_velocity = dVelocity;
-	myRobot.R_point = rPoint;
+	//myRobot.R_point = rPoint;
 	myRobot.R_velocity = rVelocity;  
 	return true;
 }

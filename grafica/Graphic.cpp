@@ -135,7 +135,8 @@ void Graphic::drawSensorInfo(sensor_t s, double distance)
 	//float y = lastRobotPos.position.y + sensDist*cos(sensAngle);
 
 	//al_draw_line(x, y, x + distance*sin(sensAngle+s.angle), y + distance*cos(sensAngle+s.angle), al_map_rgb(0, 0, 255), 1);
-	std::cout << "DS  " << distance <<" ";
+	std::cout << "Sensor:" << distance <<"   ";
+
 }
 
 void Graphic::showChanges()

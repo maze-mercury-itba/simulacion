@@ -23,6 +23,12 @@ typedef struct
 	sensor_t sensorArray[AMOUNT_OF_SENSORS]; //Arreglo de sensores
 }robot_t;
 
+typedef struct 
+{
+	double amountOfSides;
+	dvector_t * side;
+}area_t;
+
 typedef struct
 {
 	uint16_t nWalls;	//cantidad de elementos en el arreglo wall

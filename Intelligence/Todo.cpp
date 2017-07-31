@@ -9,6 +9,7 @@ static map_t map;
 
 #define PI		3.14159
 #define SPEED	1
+#define ROTATION_SPEED (PI/100.0)	
 enum dirs { STILL, UP, DOWN, LEFT, RIGHT };
 
 // Sensores
@@ -23,9 +24,9 @@ uint16_t S_getAmountAct(void) { return 0; }
 
 // Mantenimiento
 uint16_t S_Update(void) {
-	robot.D_angle = W_getRobotPosition().angle;
-	robot.position = W_getRobotPosition().position; 
-	W_configureRobot(robot.D_angle, robot.D_velocity, robot.R_point, robot.R_velocity);
+	/*robot.D_angle = W_getRobotPosition().angle;
+	robot.position = W_getRobotPosition().position; */
+	W_configureRobot(/*robot.D_angle,*/ robot.D_velocity,/* robot.R_point,*/ robot.R_velocity);
 	return 0;
 }
 
@@ -133,12 +134,12 @@ void I_Drive(void * event)					//CAMBIOS: rotation por R_velocity. direction por
 
 	case LEFT_DOWN:
 		amMoving = LEFT;
-		robot.R_velocity = robot.R_velocity - PI / 100;
+		robot.R_velocity = - ROTATION_SPEED;
 		break;
 
 	case RIGHT_DOWN:
 		amMoving = RIGHT;
-		robot.R_velocity = robot.R_velocity + PI / 100;
+		robot.R_velocity = ROTATION_SPEED;
 		break;
 	}
 }
