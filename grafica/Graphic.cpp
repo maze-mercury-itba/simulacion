@@ -86,7 +86,7 @@ void Graphic::drawBackground()
 
 	for (unsigned int i = 0; i<map.nWalls; i++) {
 		al_draw_line(map.walls[i].start.x, map.walls[i].start.y, map.walls[i].end.x, map.walls[i].end.y,
-			al_map_rgb(0, 0, 0), WALL_THICKNESS);
+			al_map_rgb(0, 0, 0), WALL_THICKNESS/2);
 	}
 
 	al_draw_filled_circle(map.target.x, map.target.y, 5, al_map_rgb(255, 0, 0));	//dibujar el target
@@ -135,7 +135,15 @@ void Graphic::drawSensorInfo(sensor_t s, double distance)
 	//float y = lastRobotPos.position.y + sensDist*cos(sensAngle);
 
 	//al_draw_line(x, y, x + distance*sin(sensAngle+s.angle), y + distance*cos(sensAngle+s.angle), al_map_rgb(0, 0, 255), 1);
-	std::cout << "Sensor:" << distance <<"   ";
+	
+	dpoint_t spos = W_absolutePoint(s.positionOnRobot);
+	dpoint_t measured = spos;
+	measured.x += distance * sin(s.angle + lastRobotAngle);
+	measured.y -= distance * cos(s.angle + lastRobotAngle);
+	
+	al_draw_line(spos.x, spos.y, measured.x, measured.y, al_map_rgb(0, 0, 255), 3);
+	
+//	std::cout << "Sensor:" << distance <<"   ";
 
 }
 

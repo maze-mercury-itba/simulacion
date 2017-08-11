@@ -140,26 +140,33 @@ int main(void)
 	r.D_angle = 0;
 	r.D_velocity = 0;
 	r.R_velocity = 0;
+
 	r.sensorArray[0].positionOnRobot.x = 25;
 	r.sensorArray[0].positionOnRobot.y = 0;
 	r.sensorArray[0].angle = 0;
 	r.sensorArray[1].positionOnRobot.x = 0;
 	r.sensorArray[1].positionOnRobot.y = 25;
 	r.sensorArray[1].angle = -3.14195/2.0;
+	r.sensorArray[2].positionOnRobot.x = 25;
+	r.sensorArray[2].positionOnRobot.y = 50;
+	r.sensorArray[2].angle = 3.14195;
+	r.sensorArray[3].positionOnRobot.x = 50;
+	r.sensorArray[3].positionOnRobot.y = 25;
+	r.sensorArray[3].angle = 3.14195/2;
 
 	//r.width = F_getBasicInfo(WIDTH);
 	//r.height = F_getBasicInfo(HEIGHT);
-	uint16_t nSens = S_getAmountSen();
+	//	uint16_t nSens = S_getAmountSen();
 
-	for (unsigned int i = 0; i < nSens; i++) {
-		r.sensorArray[i].positionOnRobot.x = F_getSensorXPos(i);
-		r.sensorArray[i].positionOnRobot.y = F_getSensorYPos(i);
-		r.sensorArray[i].angle = F_getSensorAngle(i);
-	}
+	//for (unsigned int i = 0; i < AMOUNT_OF_SENSORS; i++) {
+	//	r.sensorArray[i].positionOnRobot.x = F_getSensorXPos(i);
+	//	r.sensorArray[i].positionOnRobot.y = F_getSensorYPos(i);
+	//	r.sensorArray[i].angle = F_getSensorAngle(i);
+	//}
 	
 
 	uipoint_t rSize = {50, 50};
-	const char robotPath[] = "./robot.png";
+	const char robotPath[] = "grafica/robot.png";
 
 	Graphic g(&robotPath[0], rSize, map);
 	g.drawBackground();
@@ -183,17 +190,17 @@ int main(void)
 			worldState = W_Update();
 			S_Update();	//en estas dos funcs habria que verificar el error
 			I_Update();
-			
-			
-			
+
+
+
 			switch (worldState) {
 			case CRASHED:
-				g.drawBackground();
-				dpoint_t centerPoint;
-				centerPoint.x = 25;
-				centerPoint.y = 25;
-				g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
-				g.showChanges();
+				//g.drawBackground();
+				//dpoint_t centerPoint;
+				//centerPoint.x = 25;
+				//centerPoint.y = 25;
+				//g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
+				//g.showChanges();
 				//ev = EXIT;
 				//g.showLoseMsg();
 				break;
@@ -211,11 +218,9 @@ int main(void)
 			centerPoint.y = 25;
 			g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
 
-			//for (unsigned int i = 0; i<nSens; i++)
-			g.drawSensorInfo(r.sensorArray[0], S_getStateValue(0)); //aca mostras lo que te devuelve sen&act de alguna manera
-			g.drawSensorInfo(r.sensorArray[1], S_getStateValue(1));
-			std::cout << std::endl;
-			S_getAmountAct();
+			for (unsigned int i = 0; i < AMOUNT_OF_SENSORS; i++) {
+				g.drawSensorInfo(r.sensorArray[i], S_getStateValue(i)); //aca mostras lo que te devuelve sen&act de alguna manera
+			}
 			g.showChanges();
 			break;
 

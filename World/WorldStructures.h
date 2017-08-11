@@ -3,7 +3,7 @@
 
 #include "../vector.h"
 
-#define AMOUNT_OF_SENSORS	10	//puse un numero random
+#define AMOUNT_OF_SENSORS	4	//puse un numero random
 typedef enum { NOTHING_HAPPENED, CRASHED, ARRIVED_2_TARGET }robotState_t;
 
 typedef struct {
