@@ -24,10 +24,4 @@ typedef struct
 	int fromY;
 }sensorInfo_s;
 
-typedef struct
-{
-	double x;
-	double y;
-}coordinate_s;
-
 #endif //INTELLIGENCERESOURCES_H
