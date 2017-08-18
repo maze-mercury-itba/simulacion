@@ -13,7 +13,7 @@
 
 
 // Actuadores
-void S_setActuatorMov (uint16_t actuator_id, int8_t actuator_percentage);
+void S_setActuatorMov (uint16_t actuator_id, int16_t actuator_percentage);
 
 
 // Inicializacion
