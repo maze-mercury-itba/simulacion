@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define PI 3.14159265359
+#define MAX_VEL_R (PI/100)
+#define MAX_VEL_D 1
+
 typedef struct{
 	double right;
 	double left;
@@ -9,27 +13,27 @@ typedef struct{
 
 static actuator_percentage_t percentage_old, percentage_new;
 
-static void init_random (void){
+static void init_random (void){		//inicializacion para generar numeros random
 	time_t t;
 	srand((unsigned) time(&t));
 }
 
-static uint16_t generate_random (uint16_t max){
+static uint16_t generate_random (uint16_t max){		//generador de random (>0) a partir del valor max
 	return (rand()%max);
 }
 
 static uint16_t convert_data (double data_r, double data_l, double * velocidad_d, double * velocidad_r){
 	if((data_l<=100) && (data_l>=-100) && (data_r<=100) && (data_r>=-100)) //probamos que no se encuentre dentro del rango
 	{
-		*velocidad_d = ((data_l + data_r) / 200);
-		*velocidad_r = ((data_l - data_r) / 200);	
+		*velocidad_d = (((data_l + data_r) / 200)*MAX_VEL_D);   //Calculo de velocidades
+		*velocidad_r = (((data_l - data_r) / 200)*MAX_VEL_R);	
 		return 1;
 	}
 	else
 		return 0;
 }
 
-static void magic (void){
+static void magic (void){		// Handler de errores y convercion
 	//no magic example
 	double dvelocity, rvelocity;
 	double *p_dvelocity = &dvelocity, *p_rvelocity = &rvelocity;
@@ -42,7 +46,7 @@ static void magic (void){
 
 }
 
-void S_setActuatorMov(uint16_t actuator_id, int16_t actuator_percentage){
+void S_setActuatorMov(uint16_t actuator_id, int16_t actuator_percentage){	//guardado de info
 	switch(actuator_id)
 	{
 		case 0:
