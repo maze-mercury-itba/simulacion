@@ -1,19 +1,21 @@
 #include <Windows.h>
 #include <iostream>
 #include <cstdio>
-#include ".\World\World.h"
-#include ".\grafica\EventGenerator.h"
-#include ".\grafica\Graphic.h"
+#include "World\World.h"
+#include "grafica\EventGenerator.h"
+#include "grafica\Graphic.h"
 //extern "C" {
-#include ".\senact\senact.h"
-#include ".\Intelligence\Intelligence.h"
+#include "senact\senact.h"
+#include "Intelligence\Intelligence.h"
 //}
 #include <allegro5\allegro.h>
-#include ".\FileHandler\mapFile.h"
+#include "FileHandler\mapFile.h"
 extern "C" {
-#include ".\FileHandler\FileHandler.h"
-#include "./TFD/tinyfiledialogs.h"
+#include "FileHandler\FileHandler.h"
+#include "TFD\tinyfiledialogs.h"
 }
+#include "grafica\Button.h"
+#include "grafica\Dispatcher.h"
 
 enum robotData {WIDTH, HEIGHT, SHAPE, N_SENS};
 
@@ -21,13 +23,15 @@ enum robotData {WIDTH, HEIGHT, SHAPE, N_SENS};
 
 int main(void)
 {
-	ShowWindow(GetConsoleWindow(), SW_HIDE); //oculto la consola.
-	tinyfd_messageBox("Bienvenido", "Esta es una prueba beta del modulo\nMundo del Maze Mercurry Itba.", "info", "info", 0);
-	tinyfd_messageBox("Instrucciones", "Las flechas del teclado se usan para mover al robot. La tecla F se usa para fastfoward y la S para slowmotion.\nESC para salir", "ok", "info", 0);
-	tinyfd_messageBox("Informacion del Robot", "El robot mide 50x50 y tiene 2 sensores uno mirando hacia adelante desde el centro del borde superior del robot y otro mirando hacia la izquierda desde el centro del borde izquierdo del robot", "ok", "info", 0);
-	int check = tinyfd_messageBox("Continuar...", "¿Desea ver la informacion de los sensores?\nTenga en cuenta que si acepta continuar se va abrir una ventana de consola mostrando los valores de los sensores.", "yesno", "question", 1);
-	if (check == 1)
-		ShowWindow(GetConsoleWindow(), SW_SHOW); //oculto la consola.
+	//ShowWindow(GetConsoleWindow(), SW_HIDE); //oculto la consola.
+	//tinyfd_messageBox("Bienvenido", "Esta es una prueba beta del modulo\nMundo del Maze Mercurry Itba.", "info", "info", 0);
+	//tinyfd_messageBox("Instrucciones", "Las flechas del teclado se usan para mover al robot. La tecla F se usa para fastfoward y la S para slowmotion.\nESC para salir", "ok", "info", 0);
+	//tinyfd_messageBox("Informacion del Robot", "El robot mide 50x50 y tiene 2 sensores uno mirando hacia adelante desde el centro del borde superior del robot y otro mirando hacia la izquierda desde el centro del borde izquierdo del robot", "ok", "info", 0);
+	//int check = tinyfd_messageBox("Continuar...", "¿Desea ver la informacion de los sensores?\nTenga en cuenta que si acepta continuar se va abrir una ventana de consola mostrando los valores de los sensores.", "yesno", "question", 1);
+	//if (check == 1)
+	//	ShowWindow(GetConsoleWindow(), SW_SHOW); //oculto la consola.
+
+
 	if (!al_init())
 		return EXIT_FAILURE;
 	map_t map;
@@ -52,27 +56,27 @@ int main(void)
 	r.robotPoints[2].y = 50;
 	r.robotPoints[3].x = 50;
 	r.robotPoints[3].y = 50;
-	
+
 	r.robotPoints[4].x = 0;
 	r.robotPoints[4].y = 15;
 	r.robotPoints[5].x = 0;
 	r.robotPoints[5].y = 30;
-	
+
 	r.robotPoints[6].x = 15;
 	r.robotPoints[6].y = 0;
 	r.robotPoints[7].x = 30;
 	r.robotPoints[7].y = 0;
-	
+
 	r.robotPoints[8].x = 50;
 	r.robotPoints[8].y = 15;
 	r.robotPoints[9].x = 50;
 	r.robotPoints[9].y = 30;
-	
+
 	r.robotPoints[10].x = 15;
 	r.robotPoints[10].y = 50;
 	r.robotPoints[11].x = 30;
 	r.robotPoints[11].y = 50;
-	
+
 	r.robotPoints[12].x = 0;
 	r.robotPoints[12].y = 10;
 	r.robotPoints[13].x = 0;
@@ -144,15 +148,15 @@ int main(void)
 	r.sensorArray[0].positionOnRobot.x = 25;
 	r.sensorArray[0].positionOnRobot.y = 0;
 	r.sensorArray[0].angle = 0;
-	r.sensorArray[1].positionOnRobot.x = 0;
-	r.sensorArray[1].positionOnRobot.y = 25;
-	r.sensorArray[1].angle = -3.14195/2.0;
-	r.sensorArray[2].positionOnRobot.x = 25;
-	r.sensorArray[2].positionOnRobot.y = 50;
-	r.sensorArray[2].angle = 3.14195;
-	r.sensorArray[3].positionOnRobot.x = 50;
-	r.sensorArray[3].positionOnRobot.y = 25;
-	r.sensorArray[3].angle = 3.14195/2;
+	r.sensorArray[1].positionOnRobot.x = 15;
+	r.sensorArray[1].positionOnRobot.y = 0;
+	r.sensorArray[1].angle = -3.14195 / 6.0;
+	r.sensorArray[2].positionOnRobot.x = 35;
+	r.sensorArray[2].positionOnRobot.y = 0;
+	r.sensorArray[2].angle = 3.14195 / 6.0;
+	//r.sensorArray[3].positionOnRobot.x = 50;
+	//r.sensorArray[3].positionOnRobot.y = 25;
+	//r.sensorArray[3].angle = 3.14195/2;
 
 	//r.width = F_getBasicInfo(WIDTH);
 	//r.height = F_getBasicInfo(HEIGHT);
@@ -163,13 +167,15 @@ int main(void)
 	//	r.sensorArray[i].positionOnRobot.y = F_getSensorYPos(i);
 	//	r.sensorArray[i].angle = F_getSensorAngle(i);
 	//}
-	
 
-	uipoint_t rSize = {50, 50};
+
+	fpoint_t rSize = { 50.0, 50.0 };
 	const char robotPath[] = "grafica/robot.png";
 
-	Graphic g(&robotPath[0], rSize, map);
+	Graphic g(&robotPath[0], rSize, &map, NULL, 1000, 700);
 	g.drawBackground();
+	g.drawButtons();
+	g.drawSimSpeed(1.0);
 	g.showChanges();
 
 	W_Init(&map);
@@ -177,61 +183,17 @@ int main(void)
 	W_setRobotConfiguration(&r);
 	S_setActuatorError(0, NULL);
 	S_setSensorError(0, NULL);
-	EventGenerator e(g.getDisplay());
-	uint16_t ev = NO_EVENT;
-	uint16_t worldState = NOTHING_HAPPENED;
+	EventGenerator e(g.getDisplay(), g.getButtons());
+	Event * ev = new Event(NO_EVENT);
 
+	Dispatcher d(g, r);
 	//Orden de updates: mundo, sensores y actuadores, inteligencia. Es importante.
 	do {
+		delete ev;
 		ev = e.getNextEvent();
-
-		switch (ev) {
-		case SIMULATION_TIMEOUT:
-			worldState = W_Update();
-			S_Update();	//en estas dos funcs habria que verificar el error
-			I_Update();
-
-
-
-			switch (worldState) {
-			case CRASHED:
-				//g.drawBackground();
-				//dpoint_t centerPoint;
-				//centerPoint.x = 25;
-				//centerPoint.y = 25;
-				//g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
-				//g.showChanges();
-				//ev = EXIT;
-				//g.showLoseMsg();
-				break;
-			case ARRIVED_2_TARGET:
-				ev = EXIT;
-				g.showWinMsg();
-				break;
-			}
-			break;
-
-		case FRAME_TIMEOUT:
-			g.drawBackground();
-			dpoint_t centerPoint;
-			centerPoint.x = 25;
-			centerPoint.y = 25;
-			g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
-
-			for (unsigned int i = 0; i < AMOUNT_OF_SENSORS; i++) {
-				g.drawSensorInfo(r.sensorArray[i], S_getStateValue(i)); //aca mostras lo que te devuelve sen&act de alguna manera
-			}
-			g.showChanges();
-			break;
-
-
-		default:
-			if (ev != NO_EVENT)
-				I_Drive(&ev); //si el evento no es para mi, es para la inteligencia
-			break;
-		}
-
-	} while (ev != EXIT);
+		d.dispatch(ev);
+	} while (ev->name != EXIT);
+	delete ev;
 
 	return EXIT_SUCCESS;
 }
