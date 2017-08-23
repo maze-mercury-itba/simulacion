@@ -1,7 +1,7 @@
 #ifndef INTELLIGENCERESOURCES_H
 #define INTELLIGENCERESOURCES_H
 
-#define SENSORS_AMMOUNT		12
+#define SENSORS_AMMOUNT		3
 //#define ANGLE_SECOND_SENSOR	0.6981317
 //#define DISTANCE_PJ	
 #define MIN_DISTANCE		20
@@ -23,11 +23,5 @@ typedef struct
 	int fromX;
 	int fromY;
 }sensorInfo_s;
-
-typedef struct
-{
-	double x;
-	double y;
-}coordinate_s;
 
 #endif //INTELLIGENCERESOURCES_H
