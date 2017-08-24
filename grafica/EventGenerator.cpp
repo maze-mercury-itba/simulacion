@@ -148,7 +148,8 @@ Event * EventGenerator::getNextEvent()
 		} break;
 		}
 	}
-	else {
+	
+	if (e == nullptr) {
 		e = new Event(NO_EVENT);
 	}
 

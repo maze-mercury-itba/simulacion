@@ -147,6 +147,10 @@ void Graphic::drawBackground()
 //	al_draw_filled_circle(map.target.x, map.target.y, 5, al_map_rgb(255, 0, 0));	//dibujar el target
 }
 
+
+
+
+
 void Graphic::drawRobot(dpoint_t pos, double angle)
 {
 	fpoint_t newPos = scalePoint(pos);

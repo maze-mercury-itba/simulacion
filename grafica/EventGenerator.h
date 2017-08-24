@@ -21,7 +21,7 @@
 #endif
 
 //(va a ir cambiando con fastforward y eso), esta en segundos!
-#define	MIN_SIMULATION_TIMER		0.001	//lo mas rapido que puede ir la simulacion
+#define	MIN_SIMULATION_TIMER		0.0005	//lo mas rapido que puede ir la simulacion
 
 class EventGenerator
 {

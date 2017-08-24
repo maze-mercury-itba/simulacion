@@ -70,8 +70,9 @@ void Dispatcher::dispatch(Event * ev)
 			g.drawSimSpeed(DEFAULT_SIM_TIMEOUT/ float(simTimeout));
 			break;
 	
-		case SWITCH_MODE:
-			manual = !manual;
+		case SWITCH_MODE: {
+			manual = !manual;	//ESTO FALTA HACERLO!
+		}
 			break;
 
 		case PAUSE:
@@ -111,9 +112,11 @@ void Dispatcher::dispatch(Event * ev)
 				}
 			}
 			else {
-				waitingNewPos = true;
-				g.setButtonState(B_NEWPOS, false);
-				g.drawButtons(B_NEWPOS);
+				if (ev->x == UINT16_MAX) {
+					waitingNewPos = true;
+					g.setButtonState(B_NEWPOS, false);
+					g.drawButtons(B_NEWPOS);
+				}
 			}
 
 		case EXIT:
