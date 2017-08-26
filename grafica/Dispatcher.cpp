@@ -34,8 +34,8 @@ void Dispatcher::dispatch(Event * ev)
 		case FRAME_TIMEOUT: 
 			g.drawBackground();
 			dpoint_t centerPoint;
-			centerPoint.x = 25;
-			centerPoint.y = 25;
+			centerPoint.x = .15/2;
+			centerPoint.y = .15/2;
 			g.drawRobot(W_absolutePoint(centerPoint), W_getRobotPosition().angle);
 
 			for (unsigned int i = 0; i < AMOUNT_OF_SENSORS; i++) {
@@ -100,7 +100,7 @@ void Dispatcher::dispatch(Event * ev)
 			}
 			break;
 
-		case NEWPOS:
+		case NEWPOS: {
 			if (waitingNewPos == true) {
 				dpoint_t newPos = g.realFromPixel(ev->x, ev->y);
 				if (newPos.x != DBL_MAX && newPos.y != DBL_MAX) {
@@ -118,6 +118,7 @@ void Dispatcher::dispatch(Event * ev)
 					g.drawButtons(B_NEWPOS);
 				}
 			}
+		} break;
 
 		case EXIT:
 			break;

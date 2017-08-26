@@ -38,11 +38,11 @@ private:
 	bool isValid;
 
 	ALLEGRO_DISPLAY * display;
-	fpoint_t dispSize;
-	fpoint_t map0;			//coordenada 0,0 del mapa
-	fpoint_t mapSize;		//tamanio del mapa en el display
-	fvector_t mapArea;		//donde puedo llegar a encontrar el robot (aunque se haya salido del mapa
-	fvector_t realMap;	//alto/ancho del mapa real (empieza siempre en el 0,0)
+	dpoint_t dispSize;
+	dpoint_t map0;			//coordenada 0,0 del mapa
+	dpoint_t mapSize;		//tamanio del mapa en el display
+	dvector_t mapArea;		//donde puedo llegar a encontrar el robot (aunque se haya salido del mapa
+	dvector_t realMap;	//alto/ancho del mapa real (empieza siempre en el 0,0)
 
 	ALLEGRO_BITMAP * robot;
 	ALLEGRO_BITMAP * background;
@@ -50,8 +50,8 @@ private:
 	std::vector<uivector_t> currMap;	//el mapa en escala
 	std::vector<Button> b;
 
-	fpoint_t robotSize;
-	fpoint_t robotScaleFactor;
+	dpoint_t robotSize;
+	dpoint_t robotScaleFactor;
 	dpoint_t lastRobotPos; //para saber donde dibujar si me llega data de los sensores
 	double lastRobotAngle;
 
@@ -59,8 +59,12 @@ private:
 	uint16_t fontSize;
 
 	void rescaleMap();
-	fvector_t scaleVector(dvector_t wall);
-	fpoint_t scalePoint(dpoint_t p);
+	dvector_t scaleVector(dvector_t wall);
+	dpoint_t scalePoint(dpoint_t p);
+	
+	bool isInDisplay(dpoint_t p);
+	bool isInDisplay(dvector_t v);
+
 };
 
 

@@ -13,6 +13,8 @@ extern  "C" {
 using namespace std;
 
 
+#define DISP_TOLERANCE	50
+
 #define SPEED_STRING	"Simulation speed: x"
 #define SPEED_DIGITS	"000"		//los numeros van a tener esta cantidad de caracteres
 
@@ -50,11 +52,12 @@ Graphic::Graphic(const char * robotPath, fpoint_t robotSize, map_t * map, const 
 							realMap.end.y = max(map->walls[i].start.y, double(realMap.end.y));
 							realMap.end.y = max(map->walls[i].start.y, double(realMap.end.y));
 						}
-						this->robotSize = robotSize;
+						this->robotSize.x = robotSize.x; this->robotSize.y = robotSize.y;
 						this->map = map;
 						if (newDispSize(width, height)) {
 							this->map = map;
 							al_clear_to_color(al_map_rgb(255, 255, 255));
+							al_set_clipping_rectangle(mapArea.start.x, mapArea.start.y, mapArea.end.x - mapArea.start.x, mapArea.end.y - mapArea.start.y);
 						}
 						else {
 							isValid = false;
@@ -133,8 +136,8 @@ void Graphic::drawBackground()
 {
 	if (background == NULL) {
 		al_draw_filled_rectangle(mapArea.start.x, mapArea.start.y, mapArea.end.x, mapArea.end.y, al_map_rgb(255, 255, 255));
-		al_draw_rectangle(mapArea.start.x - G_MARGIN/2, mapArea.start.y - G_MARGIN / 2, 
-			mapArea.end.x + G_MARGIN / 2, mapArea.end.y + G_MARGIN / 2, al_map_rgb(0,0,255), G_MARGIN/2);
+//		al_draw_rectangle(mapArea.start.x - G_MARGIN/2, mapArea.start.y - G_MARGIN / 2, 
+//			mapArea.end.x + G_MARGIN / 2, mapArea.end.y + G_MARGIN / 2, al_map_rgb(0,0,255), G_MARGIN/2);
 	}
 	else
 		al_draw_scaled_bitmap(background, 0, 0, al_get_bitmap_width(background), al_get_bitmap_height(background),
@@ -153,13 +156,12 @@ void Graphic::drawBackground()
 
 void Graphic::drawRobot(dpoint_t pos, double angle)
 {
-	fpoint_t newPos = scalePoint(pos);
+	dpoint_t newPos = scalePoint(pos);
 	lastRobotPos.x = newPos.x;	lastRobotPos.y = newPos.y;
 	lastRobotAngle = angle;
 	dpoint_t bm = { al_get_bitmap_width(robot)/2, al_get_bitmap_height(robot)/2 };
 
-	if (lastRobotPos.x + bm.x < mapArea.end.x && lastRobotPos.x - bm.x > mapArea.start.x &&
-		lastRobotPos.y + bm.y < mapArea.end.y && lastRobotPos.y - bm.y > mapArea.start.y) {
+	if (isInDisplay(newPos)) {
 		al_draw_scaled_rotated_bitmap(robot, bm.x, bm.y, lastRobotPos.x, lastRobotPos.y, 
 			robotScaleFactor.x, robotScaleFactor.y, angle, 0);
 	}
@@ -176,26 +178,29 @@ void Graphic::drawRobot(double x, double y)
 
 void Graphic::drawSensorInfo(sensor_t s, double distance) 
 {
-	dvector_t realLine; fvector_t scaledLine;
+	dvector_t realLine; dvector_t scaledLine;
 	realLine.start = realLine.end = W_absolutePoint(s.positionOnRobot);
-	realLine.end.x += distance * sin(s.angle + lastRobotAngle);
-	realLine.end.y -= distance * cos(s.angle + lastRobotAngle);
-	
+
 	scaledLine = scaleVector(realLine);
 
-	al_draw_line(scaledLine.start.x, scaledLine.start.y, scaledLine.end.x, scaledLine.end.y, al_map_rgb(0, 0, 255), 3);
-	
+	if (isInDisplay(scaledLine)) {
+		al_draw_line(scaledLine.start.x, scaledLine.start.y, scaledLine.end.x, scaledLine.end.y, al_map_rgb(0, 0, 255), 3);
+	}
 //	std::cout << "Sensor:" << distance <<"   ";
 
 }
 
 void Graphic::drawButtons(button_t id)
 {
+	al_reset_clipping_rectangle();
+
 	if (id < N_BUTTONS)
 		b[id].draw();
 	else
 		for (unsigned int i = 0; i < N_BUTTONS; i++)
 			b[i].draw();
+
+	al_set_clipping_rectangle(mapArea.start.x, mapArea.start.y, mapArea.end.x - mapArea.start.x, mapArea.end.y - mapArea.start.y);
 }
 
 void Graphic::showChanges()
@@ -205,6 +210,8 @@ void Graphic::showChanges()
 
 void Graphic::drawSimSpeed(float speed)
 {
+	al_reset_clipping_rectangle();
+
 	if (SPEED_FS != fontSize){
 		fontSize = SPEED_FS;
 		if (font != nullptr) {
@@ -222,6 +229,8 @@ void Graphic::drawSimSpeed(float speed)
 			p0.y + al_get_font_line_height(font), al_map_rgb(255,255,255) );
 		al_draw_text(font, al_map_rgb(0, 0, 0), p0.x, p0.y, 0, text);
 	}
+
+	al_set_clipping_rectangle(mapArea.start.x, mapArea.start.y, mapArea.end.x - mapArea.start.x, mapArea.end.y - mapArea.start.y);
 }
 
 void Graphic::showLoseMsg()
@@ -362,8 +371,13 @@ bool Graphic::newDispSize(uint16_t width, uint16_t height)
 	}
 	rescaleMap();
 
-	robotScaleFactor.x = robotSize.x * mapSize.x / (realMap.end.x - realMap.start.x) / al_get_bitmap_width(robot);
-	robotScaleFactor.y = robotSize.y * mapSize.y / (realMap.end.y - realMap.start.y) / al_get_bitmap_height(robot);
+	robotScaleFactor.x = robotSize.x * mapSize.x / (realMap.end.x - realMap.start.x);
+	robotScaleFactor.y = robotSize.y * mapSize.y / (realMap.end.y - realMap.start.y);
+	robotScaleFactor.x /= al_get_bitmap_width(robot);
+	robotScaleFactor.y /= al_get_bitmap_height(robot);
+
+	//robotScaleFactor.x = robotSize.x * mapSize.x / (realMap.end.x - realMap.start.x) / al_get_bitmap_width(robot);
+	//robotScaleFactor.y = robotSize.y * mapSize.y / (realMap.end.y - realMap.start.y) / al_get_bitmap_height(robot);
 
 	al_clear_to_color(al_map_rgb(255, 255, 255));
 	drawBackground();
@@ -390,7 +404,7 @@ dpoint_t Graphic::realFromPixel(uint16_t x, uint16_t y)
 void Graphic::rescaleMap()
 {
 	currMap.clear();
-	fvector_t newWall;
+	dvector_t newWall;
 	uivector_t w;
 	for (unsigned int i = 0; i < map->nWalls; i++) {
 		newWall = scaleVector(map->walls[i]);
@@ -401,22 +415,36 @@ void Graphic::rescaleMap()
 	}
 }
 
-fvector_t Graphic::scaleVector(dvector_t v)
+dvector_t Graphic::scaleVector(dvector_t v)
 {
-	fvector_t ans;
+	dvector_t ans;
 	ans.start = scalePoint(v.start);
 	ans.end = scalePoint(v.end);
 	return ans;
 }
 
-fpoint_t Graphic::scalePoint(dpoint_t p)
+dpoint_t Graphic::scalePoint(dpoint_t p)
 {
-	fpoint_t ans;
+	dpoint_t ans;
 	ans.x = (p.x - realMap.start.x) / (realMap.end.x - realMap.start.x) * mapSize.x + map0.x;
 	ans.y = (p.y - realMap.start.y) / (realMap.end.y - realMap.start.y) * mapSize.y + map0.y;
-	
-	ans.x = min(ans.x, mapArea.end.x); ans.x = max(ans.x, mapArea.start.x);
-	ans.y = min(ans.y, mapArea.end.y); ans.y = max(ans.y, mapArea.start.y);
 
 	return ans;
+}
+
+bool Graphic::isInDisplay(dpoint_t p)
+{
+	bool ans = false;
+
+	if (p.x > -DISP_TOLERANCE && p.x < dispSize.x + DISP_TOLERANCE &&
+		p.y > -DISP_TOLERANCE && p.y < dispSize.y + DISP_TOLERANCE) {
+		ans = true;
+	}
+
+	return ans;
+}
+
+bool Graphic::isInDisplay(dvector_t v)
+{
+	return (isInDisplay(v.start) && isInDisplay(v.end));
 }
