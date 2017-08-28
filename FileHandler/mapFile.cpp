@@ -136,12 +136,12 @@ bool readPoint(ifstream&f, dpoint_t& p)
 		if (f.eof() == false && bool(valid) == true) {
 			do {
 				buffer[i] = f.get();
-			} while ( (bool(isdigit(buffer[i])) == true || buffer[i] == '.' ) && f.eof() == false && i++ <= MAX_NUM_SIZE);
+			} while ( (bool(isdigit(buffer[i])) == true || buffer[i] == '.' || buffer[i] == '-' ) && f.eof() == false && i++ <= MAX_NUM_SIZE);
 
 			//ahora no me fijo que separa y del prox vector, solo me fijo donde no hay mas numero
 			//acepto con coma pero no negativo
 
-			if (isdigit(buffer[i]) == false && buffer[i] != '.' || f.eof() == true) {	//me fijo si llegue a copiar algo que no sea parte de y
+			if (isdigit(buffer[i]) == false && buffer[i] != '.' || buffer[i] == '-' || f.eof() == true) {	//me fijo si llegue a copiar algo que no sea parte de y
 				if (f.eof() == false) {
 					f.unget();		//no afecto a lo que separa los puntos entre si por las dudas
 				}
