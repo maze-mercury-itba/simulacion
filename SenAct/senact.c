@@ -70,3 +70,8 @@ void S_Init (void){
 	percentage_old.left = 0;
 
 }
+
+double S_getSensorAngle(int sensorId)
+{
+	return W_getSensorData(sensorID).distance;
+}

@@ -8,7 +8,7 @@
 //typedef sensor_id uint16_t
 
 // Sensores
-//double S_getStateValue (sensor_id);
+double S_getStateValue (sensor_id);
 //* void S_getStateSens (sensor_id);
 
 
@@ -22,9 +22,17 @@ void S_Init (void);
 // Mantenimiento
 uint16_t S_Update (void);
 
+double S_getSensorAngle(int sensorId);
 // Configuracion
 //uint16_t S_setSensorError (sen_id, * void);
 //uint16_t S_setActuatorError (sen_id, * void);
+
+
+
+//double	S_getSensorAngle(int sensorId);
+//double	S_getSensorXPos(int sensorId);
+//double	S_getSensorYPos(int sensorId);
+
 
 
 
