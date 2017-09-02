@@ -20,8 +20,8 @@ void toLowercase(char *  dest, char * origin, uint32_t max)
 
 float getFloat(char * string, int32_t * errorFlag)
 {
+	int32_t error = TRUE;				//se comienza en true, si hay error pasa a false
 	uint32_t i = 0,	pointFlag = FALSE;	//indice, flag de punto
-	*errorFlag = TRUE;		//se comienza en true, si hay error pasa a false
 
 	if ( string[i] == '-' ) //el primer caracter puede ser un menos
 	{
@@ -30,10 +30,10 @@ float getFloat(char * string, int32_t * errorFlag)
 	
 	if (string[i++] == 0)	//verificar que hay al menos un numero
 	{
-		*errorFlag = FALSE;
+		error = FALSE;
 	}
 
-	while( ( string[i] != 0 ) && ( *errorFlag == TRUE ) )
+	while( ( string[i] != 0 ) && ( error == TRUE ) )
 	{		
 		if ( isdigit(string[i]) == FALSE )
 		{
@@ -44,10 +44,14 @@ float getFloat(char * string, int32_t * errorFlag)
 			}
 			else
 			{
-				*errorFlag = FALSE;
+				error = FALSE;
 			}
 		}
 		i++;		//avanzar al prox. caracter
+	}
+
+	if (errorFlag != NULL) {
+		*errorFlag = error;
 	}
 
 	return (float)atof(string);	//si hubo error, lo que se devuelve no tiene sentido
@@ -57,20 +61,24 @@ float getFloat(char * string, int32_t * errorFlag)
 uint32_t getUnsInt(char * string, int32_t * errorFlag)
 {
 	uint32_t i = 0;
-	*errorFlag = TRUE;
+	int32_t error = TRUE;
 
 	if(!isdigit(string[i++]))	//verificar que haya al menos un digito
 	{
-		*errorFlag = FALSE;	
+		error = FALSE;	
 	}
 
-	while( ( string[i] != 0 ) && ( *errorFlag == TRUE ) )
+	while( ( string[i] != 0 ) && ( error == TRUE ) )
 	//verificar los caracteres hasta llegar al final o que haya error
 	{		
-		*errorFlag =  isdigit(string[i]);
+		error =  isdigit(string[i]);
 		i++;
 	}
 	
+	if (errorFlag != NULL) {
+		*errorFlag = error;
+	}
+
 	return (uint32_t)atoi(string); //convertir el string (si hay error se devuelve basura)
 }
 

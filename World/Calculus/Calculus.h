@@ -4,6 +4,7 @@
 
 bool onSegment(dpoint_t p, dpoint_t q, dpoint_t r); //BIEN
 int orientation(dpoint_t p, dpoint_t q, dpoint_t r); //BIEN
+//bool isItInside(double x0, double y0, double x1, double y1, double x, double y);
 bool doIntersect(dpoint_t p1, dpoint_t q1, dpoint_t p2, dpoint_t q2);//BIEN
 double max(double x, double y);//BIEN
 double min(double x, double y);//BIEN

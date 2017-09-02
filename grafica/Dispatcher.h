@@ -11,6 +11,8 @@ private:
 	bool waitingNewPos;
 	bool paused;
 	bool manual;
+	int lastDrive [3];	//vel, desp, dir, en el orden que estan en el enum
+
 	uint16_t simTimeout;
 	uint16_t simCounter;
 	Graphic& g;

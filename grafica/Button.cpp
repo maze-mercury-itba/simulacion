@@ -6,6 +6,7 @@ Button::Button(button_t name, const char * imgPath)
 {
 	isValid = false;
 	img = NULL;
+	active = true;
 
 	if (imgPath != NULL) {
 		img = al_load_bitmap(imgPath); //si hay error queda tambien en NULL

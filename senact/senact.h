@@ -3,12 +3,14 @@
 //codigos de errores -> error.h
 #define	SENACT_ERROR	1
 #define SENACT_OK 	0
-#include <cstdint>
+#include <stdint.h>
+
+enum motores {MOTOR_L, MOTOR_R};
 
 //typedef sensor_id uint16_t
 
 // Sensores
-double S_getStateValue (int hola);
+//double S_getStateValue (sensor_id);
 //* void S_getStateSens (sensor_id);
 
 
@@ -21,6 +23,8 @@ void S_Init (void);
 
 // Mantenimiento
 uint16_t S_Update (void);
+
+double S_getStateValue(int sensorID);
 
 // Configuracion
 //uint16_t S_setSensorError (sen_id, * void);

@@ -3,13 +3,18 @@
 #include "../World/World.h"
 #include "../senact/senact.h"
 
+enum dirs { W, A, S, D };
+int parseAxis(bool pos, bool neg);
+
+
 Dispatcher::Dispatcher(Graphic& g, robot_t& r) : g(g), r(r)
 {
 	waitingNewPos = false;
 	paused = false;
 	simCounter = 0;
 	simTimeout = DEFAULT_SIM_TIMEOUT;
-	manual = true;
+	manual = false;
+	memset(lastDrive, 0, sizeof(lastDrive));
 }
 
 void Dispatcher::dispatch(Event * ev)
@@ -72,6 +77,8 @@ void Dispatcher::dispatch(Event * ev)
 	
 		case SWITCH_MODE: {
 			manual = !manual;	//ESTO FALTA HACERLO!
+			I_Init(manual ? MANUAL : AUTO1);
+			memset(lastDrive, 0, sizeof(lastDrive));
 		}
 			break;
 
@@ -112,7 +119,7 @@ void Dispatcher::dispatch(Event * ev)
 				}
 			}
 			else {
-				if (ev->x == UINT16_MAX) {
+				if (ev->x == -1) {
 					waitingNewPos = true;
 					g.setButtonState(B_NEWPOS, false);
 					g.drawButtons(B_NEWPOS);
@@ -123,9 +130,20 @@ void Dispatcher::dispatch(Event * ev)
 		case EXIT:
 			break;
 
-		default:
-			if (manual && !paused && !waitingNewPos)
-				I_Drive(ev);
+		case DESP: case DIR: case VEL: {
+			if (manual && !paused && !waitingNewPos) {
+				lastDrive[ev->name - VEL] = ev->x;	//vel esta primero de los tres en el enum
+				I_Drive(lastDrive[DIR - VEL], lastDrive[DESP - VEL], lastDrive[0]);
+			}
+		} break;
+		default: {
+			;
+		}
 			break;
 	}
+}
+
+
+int parseAxis(bool pos, bool neg) {
+	return ((pos == true ? 1 : 0) - (neg == true ? 1 : 0));
 }

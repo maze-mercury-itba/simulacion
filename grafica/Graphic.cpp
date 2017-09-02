@@ -28,7 +28,7 @@ Graphic::Graphic(const char * robotPath, fpoint_t robotSize, map_t * map, const 
 	robot = NULL;
 	font = NULL;
 	background = NULL;
-	isValid = false;
+	valid = false;
 	realMap.start.x = realMap.start.y = FLT_MAX;
 	realMap.end.x = realMap.end.y = 0;
 
@@ -40,7 +40,7 @@ Graphic::Graphic(const char * robotPath, fpoint_t robotSize, map_t * map, const 
 					al_init_font_addon();
 					al_init_ttf_addon();
 					if (setUpButtons(b)) {
-						isValid = true;
+						valid = true;
 						for (unsigned int i = 0; i < map->nWalls; i++) {
 							realMap.start.x = min(map->walls[i].start.x, double(realMap.start.x));
 							realMap.start.x = min(map->walls[i].end.x, double(realMap.start.x));
@@ -60,7 +60,7 @@ Graphic::Graphic(const char * robotPath, fpoint_t robotSize, map_t * map, const 
 							al_set_clipping_rectangle(mapArea.start.x, mapArea.start.y, mapArea.end.x - mapArea.start.x, mapArea.end.y - mapArea.start.y);
 						}
 						else {
-							isValid = false;
+							valid = false;
 							fprintf(stderr, "Unable to create display\n");
 							if (background != nullptr)
 								al_destroy_bitmap(background);
@@ -109,7 +109,7 @@ Graphic::Graphic(const char * robotPath, fpoint_t robotSize, map_t * map, const 
 
 Graphic::~Graphic()
 {
-	if (this->isValid) {
+	if (this->valid) {
 		if (background != NULL) {
 			al_destroy_bitmap(background);
 			background = NULL;
@@ -132,12 +132,15 @@ Graphic::~Graphic()
 	}
 }
 
+bool Graphic::isValid(void)
+{
+	return valid;
+}
+
 void Graphic::drawBackground()
 {
 	if (background == NULL) {
 		al_draw_filled_rectangle(mapArea.start.x, mapArea.start.y, mapArea.end.x, mapArea.end.y, al_map_rgb(255, 255, 255));
-//		al_draw_rectangle(mapArea.start.x - G_MARGIN/2, mapArea.start.y - G_MARGIN / 2, 
-//			mapArea.end.x + G_MARGIN / 2, mapArea.end.y + G_MARGIN / 2, al_map_rgb(0,0,255), G_MARGIN/2);
 	}
 	else
 		al_draw_scaled_bitmap(background, 0, 0, al_get_bitmap_width(background), al_get_bitmap_height(background),
@@ -147,7 +150,6 @@ void Graphic::drawBackground()
 		al_draw_line(currMap[i].start.x, currMap[i].start.y, currMap[i].end.x, currMap[i].end.y,
 			al_map_rgb(0, 0, 0), min(mapSize.x, mapSize.y)*0.01);
 	}
-//	al_draw_filled_circle(map.target.x, map.target.y, 5, al_map_rgb(255, 0, 0));	//dibujar el target
 }
 
 
@@ -167,27 +169,19 @@ void Graphic::drawRobot(dpoint_t pos, double angle)
 	}
 }
 
-void Graphic::drawRobot(double x, double y)
-{
-	dpoint_t pos = { x, y };
-	if (x == DBL_MAX || y == DBL_MAX)
-		pos = lastRobotPos;
-
-	drawRobot(pos, lastRobotAngle);
-}
-
 void Graphic::drawSensorInfo(sensor_t s, double distance) 
 {
 	dvector_t realLine; dvector_t scaledLine;
 	realLine.start = realLine.end = W_absolutePoint(s.positionOnRobot);
+
+	realLine.end.x += (distance * sin(s.angle + W_getRobotPosition().angle));
+	realLine.end.y -= (distance * cos(s.angle + W_getRobotPosition().angle));
 
 	scaledLine = scaleVector(realLine);
 
 	if (isInDisplay(scaledLine)) {
 		al_draw_line(scaledLine.start.x, scaledLine.start.y, scaledLine.end.x, scaledLine.end.y, al_map_rgb(0, 0, 255), 3);
 	}
-//	std::cout << "Sensor:" << distance <<"   ";
-
 }
 
 void Graphic::drawButtons(button_t id)
@@ -290,7 +284,7 @@ bool setUpButtons(std::vector<Button>& b)
 
 bool Graphic::newDispSize(uint16_t width, uint16_t height)
 {
-	if (isValid == false)
+	if (valid == false)
 		return false;
 
 	if (display != nullptr && width != 0 && height != 0 && al_get_display_flags(display) != ALLEGRO_FULLSCREEN_WINDOW) {
@@ -322,7 +316,7 @@ bool Graphic::newDispSize(uint16_t width, uint16_t height)
 	}
 
 	if (display == nullptr) {
-		isValid = false; //no se hizo bien el display
+		valid = false; //no se hizo bien el display
 	}
 	else { //si se hizo bien, resizeo el mapa y los botones
 		uivector_t coord;
@@ -332,14 +326,6 @@ bool Graphic::newDispSize(uint16_t width, uint16_t height)
 		coord.end.y = coord.end.x += buttonDist;
 		buttonDist += G_MARGIN; //los botones son cuadrados -> el alto es igual al ancho.
 		//ademas dejo un lugarcito entre los botones, dependiendo de cuanto lugar quiero ocupar verticalmente
-
-		//if (buttonDist < coord.end.x - coord.start.x) {
-		//	coord.end.x = coord.start.x + (G_BUTTON_H - G_MARGIN) / N_BUTTONS;
-		//	buttonDist = G_MARGIN + coord.end.x - coord.start.x;
-		//}
-
-		//coord.start.y = G_MARGIN;					//botones cuadrados!
-		//coord.end.y = coord.start.y + coord.end.x - coord.start.x;
 
 		for (unsigned int i = 0; i < b.size(); i++) {
 			b[i].resize(coord);
@@ -376,14 +362,11 @@ bool Graphic::newDispSize(uint16_t width, uint16_t height)
 	robotScaleFactor.x /= al_get_bitmap_width(robot);
 	robotScaleFactor.y /= al_get_bitmap_height(robot);
 
-	//robotScaleFactor.x = robotSize.x * mapSize.x / (realMap.end.x - realMap.start.x) / al_get_bitmap_width(robot);
-	//robotScaleFactor.y = robotSize.y * mapSize.y / (realMap.end.y - realMap.start.y) / al_get_bitmap_height(robot);
-
 	al_clear_to_color(al_map_rgb(255, 255, 255));
 	drawBackground();
 	drawButtons();
 
-	return isValid;
+	return valid;
 }
 
 dpoint_t Graphic::realFromPixel(uint16_t x, uint16_t y)

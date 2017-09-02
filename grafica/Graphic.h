@@ -14,19 +14,19 @@ public:
 	Graphic(const char * robotPath, fpoint_t robotSize, map_t * map, const char * backgroundPath, uint16_t width = 0, uint16_t height = 0);
 	~Graphic();
 
+	bool isValid(void);
+
 	ALLEGRO_DISPLAY * getDisplay();
 	const std::vector<Button> * getButtons();
 	void setButtonState(button_t name, bool active);
 
 	void drawBackground();
 	void drawRobot(dpoint_t pos, double angle);
-	void drawRobot(double x = DBL_MAX, double y = DBL_MAX); // si alguno es dblmax lo dibujo donde estaba antes
 	void drawSensorInfo(sensor_t s, double distance);
 	void drawButtons(button_t id = N_BUTTONS);
 	void showChanges();
 
 	void drawSimSpeed(float speed);
-//	mostrar cosas de los sensores!
 
 	void showWinMsg();
 	void showLoseMsg();
@@ -35,7 +35,7 @@ public:
 	dpoint_t realFromPixel(uint16_t x, uint16_t y); //dadas coordenadas del display, devuelve las reales
 
 private:
-	bool isValid;
+	bool valid;
 
 	ALLEGRO_DISPLAY * display;
 	dpoint_t dispSize;
