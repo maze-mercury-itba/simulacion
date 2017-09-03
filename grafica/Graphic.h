@@ -11,7 +11,7 @@
 class Graphic
 {
 public:
-	Graphic(const char * robotPath, fpoint_t robotSize, map_t * map, const char * backgroundPath, uint16_t width = 0, uint16_t height = 0);
+	Graphic(const char * robotPath, dpoint_t robotSize, map_t * map, const char * backgroundPath, uint16_t width = 0, uint16_t height = 0);
 	~Graphic();
 
 	bool isValid(void);
@@ -31,6 +31,7 @@ public:
 	void showWinMsg();
 	void showLoseMsg();
 
+	bool newRobot(const char * img, dpoint_t size);
 	bool newDispSize(uint16_t width = 0, uint16_t height = 0); //si recibe 0 en alguna fullscreen
 	dpoint_t realFromPixel(uint16_t x, uint16_t y); //dadas coordenadas del display, devuelve las reales
 
@@ -59,6 +60,7 @@ private:
 	uint16_t fontSize;
 
 	void rescaleMap();
+	void rescaleRobot();
 	dvector_t scaleVector(dvector_t wall);
 	dpoint_t scalePoint(dpoint_t p);
 	

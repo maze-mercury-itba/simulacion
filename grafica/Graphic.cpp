@@ -21,7 +21,7 @@ using namespace std;
 
 bool setUpButtons(std::vector<Button>& b);
 
-Graphic::Graphic(const char * robotPath, fpoint_t robotSize, map_t * map, const char * backgroundPath, uint16_t width, uint16_t height)
+Graphic::Graphic(const char * robotPath, dpoint_t robotSize, map_t * map, const char * backgroundPath, uint16_t width, uint16_t height)
 {
 	fontSize = 0;
 	display = NULL;
@@ -137,6 +137,14 @@ bool Graphic::isValid(void)
 	return valid;
 }
 
+
+
+
+
+/***********************/
+/* FUNCIONES DE DIBUJO */	
+/***********************/
+
 void Graphic::drawBackground()
 {
 	if (background == NULL) {
@@ -151,10 +159,6 @@ void Graphic::drawBackground()
 			al_map_rgb(0, 0, 0), min(mapSize.x, mapSize.y)*0.01);
 	}
 }
-
-
-
-
 
 void Graphic::drawRobot(dpoint_t pos, double angle)
 {
@@ -251,6 +255,12 @@ void Graphic::showWinMsg()
 
 }
 
+
+
+/***********************/
+/*  GETTERS / SETTERS  */
+/***********************/
+
 ALLEGRO_DISPLAY * Graphic::getDisplay()
 {
 	return display;
@@ -270,6 +280,13 @@ void Graphic::setButtonState(button_t name, bool active)
 	}
 }
 
+
+
+/***********************/
+/*    CONFIGURACION	   */
+/***********************/
+
+
 bool setUpButtons(std::vector<Button>& b)
 {
 	const char * paths[N_BUTTONS] = { "grafica/fastforward.png","grafica/slow.png", "grafica/rswitch.png", 
@@ -280,6 +297,27 @@ bool setUpButtons(std::vector<Button>& b)
 		b.push_back(button);
 	}
 	return true;
+}
+
+bool Graphic::newRobot(const char * img, dpoint_t size)
+{
+	if (valid) {
+		valid = false;
+
+		if (img != 0 && size.x > 0 && size.y > 0) {
+			al_destroy_bitmap(robot);
+			robot = al_load_bitmap(img);
+
+			if (robot != nullptr) {
+				valid = true;
+
+				robotSize = size;
+				rescaleRobot();
+			}
+		}
+	}
+
+	return valid;
 }
 
 bool Graphic::newDispSize(uint16_t width, uint16_t height)
@@ -356,11 +394,7 @@ bool Graphic::newDispSize(uint16_t width, uint16_t height)
 		}
 	}
 	rescaleMap();
-
-	robotScaleFactor.x = robotSize.x * mapSize.x / (realMap.end.x - realMap.start.x);
-	robotScaleFactor.y = robotSize.y * mapSize.y / (realMap.end.y - realMap.start.y);
-	robotScaleFactor.x /= al_get_bitmap_width(robot);
-	robotScaleFactor.y /= al_get_bitmap_height(robot);
+	rescaleRobot();
 
 	al_clear_to_color(al_map_rgb(255, 255, 255));
 	drawBackground();
@@ -368,6 +402,8 @@ bool Graphic::newDispSize(uint16_t width, uint16_t height)
 
 	return valid;
 }
+
+
 
 dpoint_t Graphic::realFromPixel(uint16_t x, uint16_t y)
 {
@@ -396,6 +432,14 @@ void Graphic::rescaleMap()
 
 		currMap.push_back(w);
 	}
+}
+
+void Graphic::rescaleRobot()
+{
+	robotScaleFactor.x = robotSize.x * mapSize.x / (realMap.end.x - realMap.start.x);
+	robotScaleFactor.y = robotSize.y * mapSize.y / (realMap.end.y - realMap.start.y);
+	robotScaleFactor.x /= al_get_bitmap_width(robot);
+	robotScaleFactor.y /= al_get_bitmap_height(robot);
 }
 
 dvector_t Graphic::scaleVector(dvector_t v)
